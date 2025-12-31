@@ -1,16 +1,16 @@
 import winston from 'winston';
 import { inspect } from 'util';
+import envVars from "@my-elk/env-vars";
 
 type TLogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly';
 const { combine, timestamp, printf, colorize, json, metadata, label } = winston.format;
 
 const createLogger = ({
-  env,
   app,
 }: {
-  env?: string;
   app: string;
 }) => {
+  const isDevelopment = envVars.ENV === 'development';
   const mergeMeta = winston.format((info: winston.Logform.TransformableInfo) => {
     type TMeta = Record<string, any>
     const { message, metadata } = info;
@@ -24,17 +24,17 @@ const createLogger = ({
     delete info.metadata;
 
     const meta = Object.values(rest).map(item => {
-      if (typeof item === 'object') return inspect(item, false, null, env === 'development');
+      if (typeof item === 'object') return inspect(item, false, null, isDevelopment);
       return item;
     })
 
-    if (env === 'development') info.message = [message, ...meta].filter(Boolean);
+    if (isDevelopment) info.message = [message, ...meta].filter(Boolean);
     else info.message = [message, ...meta].filter(Boolean).join(' ');
 
     return info;
   });
 
-  const winstonFormat = env === 'development'
+  const winstonFormat = isDevelopment
     ? combine(
       timestamp({ format: 'DD.MM.YY HH:mm:ss' }),
       metadata(),
