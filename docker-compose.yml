@@ -1,0 +1,9 @@
+services:
+  users_service_pg:
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=${USERS_SERVICE_POSTGRES_DB}
+      - POSTGRES_USER=${USERS_SERVICE_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${USERS_SERVICE_POSTGRES_PASSWORD}
+    ports:
+      - "${USERS_SERVICE_POSTGRES_PORT}:5432"
