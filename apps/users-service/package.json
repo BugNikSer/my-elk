@@ -13,8 +13,10 @@
   "dependencies": {
     "@mikro-orm/cli": "^6.6.2",
     "@mikro-orm/core": "^6.6.2",
+    "@mikro-orm/migrations": "^6.6.2",
     "@mikro-orm/postgresql": "^6.6.2",
     "@mikro-orm/reflection": "^6.6.2",
+    "@mikro-orm/sql-highlighter": "^1.0.1",
     "@my-elk/env-vars": "workspace:*",
     "@my-elk/logger": "workspace:*",
     "@trpc/server": "^11.8.1",

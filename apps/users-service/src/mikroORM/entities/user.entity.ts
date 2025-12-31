@@ -1,5 +1,5 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/postgresql";
-import { hashString } from "../utils/hash";
+import { hashString } from "../../utils/hash";
 
 @Entity()
 export class User {
