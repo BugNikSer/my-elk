@@ -22,6 +22,6 @@
     "@users-service/*": ["./apps/users-service"],
     "@expenses-service/*": ["./apps/expenses-service"],
     "@logger/*": ["./packages/logger/*"],
-    "@my-elk/env-vars/*": ["./packages/env-vars/*"],
+    "@env-vars/*": ["./packages/env-vars/*"],
   },
 }
