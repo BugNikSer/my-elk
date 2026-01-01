@@ -8,9 +8,11 @@ import { initMikroORM } from "./mikroORM";
 const logger = areaLogger("init-app");
 
 initMikroORM();
-const server = createHTTPServer({
+const trpcServer = createHTTPServer({
     router: appRouter,
+    basePath: "/trpc/"
 });
 
-logger.info(`TRPC listening port ${envVars.USERS_SERVICE_PORT}, ${process.cwd()}`)
-server.listen(envVars.USERS_SERVICE_PORT);
+trpcServer.listen(envVars.USERS_SERVICE_PORT, () => {
+    logger.info("TRPC server listening port", envVars.USERS_SERVICE_PORT)
+});

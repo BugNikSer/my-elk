@@ -1,6 +1,6 @@
 import { Entity, PrimaryKey, Property, Enum } from "@mikro-orm/postgresql";
 import { hashString } from "../../utils/hash";
-import { UserRole } from "../types/user";
+import { UserCreateInput, UserRole } from "../types/user";
 
 @Entity()
 export class User {
@@ -17,8 +17,9 @@ export class User {
     @Enum(() => UserRole)
     role: UserRole;
 
-    constructor({ email, password }: { email: string; password: string }) {
+    constructor({ email, password }: UserCreateInput) {
         this.email = email;
         this.passwordHash = hashString(password);
+        this.role = UserRole.regular;
     }
 }
