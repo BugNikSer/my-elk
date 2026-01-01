@@ -50,7 +50,7 @@ export default {
         }
         
         try {
-            em.flush();
+            await em.flush();
         } catch (e) {
             logger.warn("Failed to save changes after inserting User", e);
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR"}];
