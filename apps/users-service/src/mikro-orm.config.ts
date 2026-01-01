@@ -21,6 +21,9 @@ const config = {
     metadataProvider: TsMorphMetadataProvider,
     highlighter: new SqlHighlighter(),
     extensions: [Migrator],
+    migrations: {
+        path: "./src/mikroORM/migrations"
+    }
 } as Options<PostgreSqlDriver>;
 
 export default config;

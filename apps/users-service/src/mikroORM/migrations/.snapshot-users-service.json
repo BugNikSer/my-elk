@@ -34,6 +34,19 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "admin",
+            "regular"
+          ],
+          "mappedType": "enum"
         }
       },
       "name": "user",

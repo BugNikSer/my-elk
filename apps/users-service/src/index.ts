@@ -5,7 +5,7 @@ import envVars from "@my-elk/env-vars";
 import { areaLogger } from "./utils/logger";
 import { initMikroORM } from "./mikroORM";
 
-const logger = areaLogger("index");
+const logger = areaLogger("init-app");
 
 initMikroORM();
 const server = createHTTPServer({
