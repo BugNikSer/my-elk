@@ -8,6 +8,7 @@ type TypedVars<VarsArr extends readonly string[], T extends string | number> = P
 type TypedEnumVar<Conf extends Record<string, readonly string[]>, Key = keyof Conf> = Partial<Record<Key, Conf[Key][number]>>;
 
 const stringVars = [
+    "AUTH_SECRET",
     "USERS_SERVICE_HOST",
     "USERS_SERVICE_POSTGRES_DB",
     "USERS_SERVICE_POSTGRES_USER",

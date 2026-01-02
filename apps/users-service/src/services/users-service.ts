@@ -2,12 +2,12 @@ import { UserCreateInput, UserGetByInput } from "../mikroORM/types/user";
 import { areaLogger } from "../utils/logger";
 import { orm } from "../mikroORM";
 import { User } from "../mikroORM/entities/user.entity";
-import { AsyncResultError, ServiceError } from "../types";
+import { AsyncResultError, ResultError, ServiceError } from "../types";
 
 const logger = areaLogger("users-service");
 
 export default {
-    getBy: async (input: UserGetByInput): AsyncResultError<User, ServiceError> => {
+    getBy: async (input: UserGetByInput): Promise<ResultError<User, ServiceError>> => {
         if (!("id" in input) && !("email" in input)) return [
             null,
             {

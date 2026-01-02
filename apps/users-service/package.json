@@ -23,11 +23,15 @@
     "@my-elk/env-vars": "workspace:*",
     "@my-elk/logger": "workspace:*",
     "@trpc/server": "^11.8.1",
-    "@types/node": "^25.0.3",
-    "typescript": "^5.9.3",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.3",
     "zod": "^4.3.2"
   },
   "devDependencies": {
-    "ts-node": "^10.9.2"
+    "@types/cors": "^2.8.19",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
