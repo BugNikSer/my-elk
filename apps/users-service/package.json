@@ -2,12 +2,14 @@
   "name": "@my-elk/users-service",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx ts-node src/index.ts",
     "migration:create": "npx mikro-orm migration:create",
-    "migration:up": "npx mikro-orm migration:up"
+    "migration:up": "npx mikro-orm migration:up",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

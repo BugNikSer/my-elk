@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useColorScheme } from '@mui/material/styles';
 import { FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup, Stack } from "@mui/material";
 import { Brightness6 } from '@mui/icons-material';
@@ -13,25 +13,25 @@ function ThemeSwitch() {
         if (!mode) return <>no color mode</>;
         return (
             <Stack direction="column">
-                    <FormControl>
-                        <FormLabel>Color theme</FormLabel>
-                        <RadioGroup
-                            value={mode}
-                            onChange={(event) =>
-                                setMode(event.target.value as (typeof themeModes)[number])
-                            }
-                        >
-                            {themeModes.map((themeMode) => (
-                                <FormControlLabel
-                                    key={themeMode}
-                                    value={themeMode}
-                                    control={<Radio size='small' />}
-                                    label={themeMode}
-                                />
-                            ))}
-                        </RadioGroup>
-                    </FormControl>
-                </Stack>
+                <FormControl>
+                    <FormLabel>Color theme</FormLabel>
+                    <RadioGroup
+                        value={mode}
+                        onChange={(event) =>
+                            setMode(event.target.value as (typeof themeModes)[number])
+                        }
+                    >
+                        {themeModes.map((themeMode) => (
+                            <FormControlLabel
+                                key={themeMode}
+                                value={themeMode}
+                                control={<Radio />}
+                                label={themeMode}
+                            />
+                        ))}
+                    </RadioGroup>
+                </FormControl>
+            </Stack>
         )
     }, [mode, setMode])
 
@@ -39,6 +39,7 @@ function ThemeSwitch() {
         <Pop
             trigger={<IconButton><Brightness6 /></IconButton>}
             content={content}
+            slotProps={{ muiPopper: { placement: "left-end" } }}
         />
     )
 };

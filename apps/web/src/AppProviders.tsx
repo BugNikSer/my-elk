@@ -1,14 +1,19 @@
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from '@mui/material/CssBaseline';
+import { QueryClientProvider } from '@tanstack/react-query';
+
 import { elkTheme } from "./utils/theme";
 import App from "./App";
+import { queryClient } from "./utils/trpc";
 
 function AppProviders() {
   return (
-    <ThemeProvider theme={elkTheme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={elkTheme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </QueryClientProvider>
   )
 }
 

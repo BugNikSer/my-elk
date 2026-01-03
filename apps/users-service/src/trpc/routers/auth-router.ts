@@ -66,6 +66,7 @@ export default router({
         return "logged out";
     }),
     check: authedProcedure.query(async ({ ctx: { userId } }) => {
+        console.log("check called", userId)
         if (!userId) return null;
 
         const userResult = await usersService.getBy({ id: userId });

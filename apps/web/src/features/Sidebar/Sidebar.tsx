@@ -1,15 +1,28 @@
 import { Stack } from "@mui/material"
 import ThemeSwitch from "./ThemeSwitch";
+import Moose from "../../components/icons/Moose";
 
 function Sidebar() {
     return (
         <Stack
-            direction="column"
-            width="40px"
+            sx={(theme) => ({
+                direction: "column",
+                width: "40px",
+                height: "100%",
+                overflow: "hidden",
+                padding: "4px 0",
+                backgroundColor: theme.palette.background.paper,
+                borderRight: `2px solid ${theme.palette.divider}`,
+            })}
+            justifyContent="space-between"
         >
-            <span>1</span>
-            <span>2</span>
-            <ThemeSwitch />
+            <Stack direction="column" gap="4px">
+                <Moose color="primary" sx={{ width: "1em", height: "1em", fontSize: "1.5rem", margin: "6px" }} />
+            </Stack>
+            <Stack direction="column" gap="4px">
+                <ThemeSwitch />
+            </Stack>
+            
         </Stack>
     )
 };

@@ -12,7 +12,7 @@ export interface PopProps {
     content: ReactElement;
     // muiPopperProps?: PopperProps;
     slotProps?: {
-        muiPopper?: PopperProps,
+        muiPopper?: Partial<PopperProps>,
         muiPaper?: PaperProps;
     }
 }
