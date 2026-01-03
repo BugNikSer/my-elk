@@ -2,7 +2,7 @@ import { UserCreateInput, UserGetByInput } from "../mikroORM/types/user";
 import { areaLogger } from "../utils/logger";
 import { orm } from "../mikroORM";
 import { User } from "../mikroORM/entities/user.entity";
-import { AsyncResultError, ResultError, ServiceError } from "../types";
+import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
 
 const logger = areaLogger("users-service");
 

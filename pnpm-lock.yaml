@@ -34,12 +34,18 @@ importers:
       '@mikro-orm/sql-highlighter':
         specifier: ^1.0.1
         version: 1.0.1
+      '@my-elk/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@my-elk/env-vars':
         specifier: workspace:*
         version: link:../../packages/env-vars
       '@my-elk/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@my-elk/result-error':
+        specifier: workspace:*
+        version: link:../../packages/result-error
       '@trpc/server':
         specifier: ^11.8.1
         version: 11.8.1(typescript@5.9.3)
@@ -133,6 +139,41 @@ importers:
         specifier: ^7.2.4
         version: 7.3.0(@types/node@24.10.4)(tsx@4.21.0)
 
+  packages:
+
+    dependencies:
+      '@trpc/server':
+        specifier: ^11.8.1
+        version: 11.8.1(typescript@5.9.3)
+      jsonwebtoken:
+        specifier: ^9.0.3
+        version: 9.0.3
+
+  packages/auth:
+    dependencies:
+      '@my-elk/env-vars':
+        specifier: workspace:*
+        version: link:../env-vars
+      '@my-elk/logger':
+        specifier: workspace:*
+        version: link:../logger
+      '@my-elk/result-error':
+        specifier: workspace:*
+        version: link:../result-error
+      '@trpc/server':
+        specifier: ^11.8.1
+        version: 11.8.1(typescript@5.9.3)
+      jsonwebtoken:
+        specifier: ^9.0.3
+        version: 9.0.3
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+    devDependencies:
+      '@types/jsonwebtoken':
+        specifier: ^9.0.10
+        version: 9.0.10
+
   packages/env-vars:
     dependencies:
       '@types/node':
@@ -156,6 +197,15 @@ importers:
       winston:
         specifier: ^3.19.0
         version: 3.19.0
+
+  packages/result-error:
+    dependencies:
+      '@trpc/server':
+        specifier: ^11.8.1
+        version: 11.8.1(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
 packages:
 

@@ -1,0 +1,25 @@
+{
+  "name": "@my-elk/auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.27.0",
+  "dependencies": {
+    "@my-elk/env-vars": "workspace:*",
+    "@my-elk/logger": "workspace:*",
+    "@my-elk/result-error": "workspace:*",
+    "@trpc/server": "^11.8.1",
+    "jsonwebtoken": "^9.0.3",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10"
+  }
+}
