@@ -15,6 +15,12 @@
     "@fontsource/roboto": "^5.2.9",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
+    "@my-elk/users-service": "workspace:*",
+    "@tanstack/react-query": "^5.90.16",
+    "@tanstack/store": "^0.8.0",
+    "@trpc/client": "^11.8.1",
+    "@trpc/server": "^11.8.1",
+    "@trpc/tanstack-react-query": "^11.8.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "usehooks-ts": "^3.1.1"

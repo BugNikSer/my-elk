@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useColorScheme } from '@mui/material/styles';
 import { FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup, Stack } from "@mui/material";
 import { Brightness6 } from '@mui/icons-material';
-import { Pop } from '../Pop';
+import { Pop } from '../../components/Pop';
 
 const themeModes = ["system", "light", "dark"] as const;
 

@@ -3,7 +3,7 @@ import cors from 'cors';
 import envVars from "@my-elk/env-vars";
 
 import { appRouter } from "./router";
-import { createTRPCContext } from "./context";
+import { createTRPCBackendContext } from "./context";
 import { areaLogger } from "../utils/logger";
 
 const logger = areaLogger("init-trpc");
@@ -12,7 +12,7 @@ export const initTrpcServer = () => {
     const trpcServer = createHTTPServer({
         router: appRouter,
         basePath: "/trpc/",
-        createContext: createTRPCContext,
+        createContext: createTRPCBackendContext,
         middleware: cors(),
     });
 

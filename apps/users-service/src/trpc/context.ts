@@ -11,7 +11,7 @@ export type TRPCContext = {
     refreshToken: string | null
 }
 
-export async function createTRPCContext({
+export async function createTRPCBackendContext({
     req,
     res,
 }: CreateHTTPContextOptions): Promise<TRPCContext> {
