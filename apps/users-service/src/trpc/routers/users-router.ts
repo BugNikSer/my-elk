@@ -48,24 +48,4 @@ export default router({
 
             if (result) return result;
         }),
-    create: publicProcedure
-        .input(z.object({ email: z.email(), password: z.string() }))
-        .mutation(async ({ input }) => {
-            const [result, error] = await usersService
-                .create(input)
-                .catch(e => {
-                    logger.warn("create => usersService.create", e);
-                    throw new TRPCError({
-                        code: "INTERNAL_SERVER_ERROR",
-                        message: e.message,
-                    })
-            });
-
-            if (error) throw new TRPCError({
-                code: error.code,
-                message: error.error.message,
-            });
-
-            if (result) return result;
-        })
 })
