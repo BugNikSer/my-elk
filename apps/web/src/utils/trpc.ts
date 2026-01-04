@@ -7,7 +7,7 @@ const { VITE_USERS_SERVICE } = import.meta.env;
 
 export const queryClient = new QueryClient({
     defaultOptions: {
-        queries: { retry: false },
+        queries: { retry: false, enabled: false },
     },
 });
 

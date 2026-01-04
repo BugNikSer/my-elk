@@ -1,9 +1,14 @@
 import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
 import createLogger from "@my-elk/logger";
 import { generateToken, parseToken } from "./tokens";
+import envVars from "@my-elk/env-vars";
 
 export const TOKENS_COOKIE_KEY = "tokens";
-const COOKIES_DEFAULT = " HttpOnly=true; Secure=false; SameSite=None; Path=/";
+const COOKIES_DEFAULT = `HttpOnly=true; Secure=${
+    envVars.ENV === "development" ? "false" : "true"
+}; SameSite=${
+    envVars.ENV === "development" ? "None" : "Lax"
+}; Path=/`;
 
 export const parseCookies = (cookieString = "") => cookieString.split(";").reduce((acc, part) => {
     const [key, value] = part.trim().split("=");

@@ -11,7 +11,7 @@ import AuthForm from "./AuthForm";
 function AuthWrapper({ children } : PropsWithChildren) {
     const user = useStore(userStore);
 
-    const { data, error, isLoading, refetch } = useQuery(trpc.auth.check.queryOptions(undefined, { retry: false }));
+    const { data, error, isLoading, refetch } = useQuery(trpc.auth.check.queryOptions(undefined, { enabled: true }));
 
     useEffect(() => {
         if (!user && data) {

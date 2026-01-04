@@ -9,6 +9,7 @@ type TypedEnumVar<Conf extends Record<string, readonly string[]>, Key = keyof Co
 
 const stringVars = [
     "AUTH_SECRET",
+    "WEB_URL",
     "USERS_SERVICE_HOST",
     "USERS_SERVICE_POSTGRES_DB",
     "USERS_SERVICE_POSTGRES_USER",

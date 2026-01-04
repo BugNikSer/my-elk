@@ -1,6 +1,5 @@
 import cors from 'cors';
 import { createHTTPServer } from "@trpc/server/adapters/standalone";
-
 import envVars from "@my-elk/env-vars";
 
 import { appRouter } from "./router";
@@ -15,9 +14,8 @@ export const initTrpcServer = () => {
         basePath: "/users-trpc/",
         createContext: createTRPCBackendContext,
         middleware: cors({
+            origin: envVars.WEB_URL,
             credentials: true,
-            // origin: "*",
-            origin: "http://localhost:5173",
         }),
     });
 

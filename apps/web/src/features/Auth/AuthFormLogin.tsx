@@ -13,7 +13,7 @@ function AuthFormLogin() {
     const isEmailValid = useMemo(() => /[a-zA-Z0-9]+\@[a-zA-Z0-9]+\.[a-zA-Z]+/.test(email), [email]);
     const isPasswordValid = useMemo(() => password.length > 2 ,[password]);
 
-    const { data, error, isLoading, refetch } = useQuery(trpc.auth.login.queryOptions({ email, password }, { enabled: false }));
+    const { data, error, isLoading, refetch } = useQuery(trpc.auth.login.queryOptions({ email, password }));
 
     useEffect(() => {
         if (data) userStore.setState(data)

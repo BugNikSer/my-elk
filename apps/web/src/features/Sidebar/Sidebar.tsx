@@ -1,5 +1,5 @@
 import { Stack } from "@mui/material"
-import ThemeSwitch from "./ThemeSwitch";
+import InfoBlock from "./InfoBlock";
 import Moose from "../../components/icons/Moose";
 
 function Sidebar() {
@@ -20,7 +20,7 @@ function Sidebar() {
                 <Moose color="primary" sx={{ width: "1em", height: "1em", fontSize: "1.5rem", margin: "4px 8px" }} />
             </Stack>
             <Stack direction="column" gap="4px">
-                <ThemeSwitch />
+                <InfoBlock />
             </Stack>
             
         </Stack>
