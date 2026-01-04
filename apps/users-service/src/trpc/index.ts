@@ -1,5 +1,6 @@
-import { createHTTPServer } from "@trpc/server/adapters/standalone";
 import cors from 'cors';
+import { createHTTPServer } from "@trpc/server/adapters/standalone";
+
 import envVars from "@my-elk/env-vars";
 
 import { appRouter } from "./router";
@@ -11,9 +12,13 @@ const logger = areaLogger("init-trpc");
 export const initTrpcServer = () => {
     const trpcServer = createHTTPServer({
         router: appRouter,
-        basePath: "/trpc/",
+        basePath: "/users-trpc/",
         createContext: createTRPCBackendContext,
-        middleware: cors(),
+        middleware: cors({
+            credentials: true,
+            // origin: "*",
+            origin: "http://localhost:5173",
+        }),
     });
 
     trpcServer.listen(envVars.USERS_SERVICE_PORT, () => {

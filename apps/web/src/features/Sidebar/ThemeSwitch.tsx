@@ -39,7 +39,10 @@ function ThemeSwitch() {
         <Pop
             trigger={<IconButton><Brightness6 /></IconButton>}
             content={content}
-            slotProps={{ muiPopper: { placement: "left-end" } }}
+            slotProps={{
+                muiPopper: { placement: "left-end" },
+                muiPaper: { sx: { padding: "16px" } }
+            }}
         />
     )
 };

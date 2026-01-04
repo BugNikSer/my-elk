@@ -7,7 +7,7 @@ export interface TokenPayload {
     userId: number;
 }
 
-export const generateToken = (payload: TokenPayload, ttlHours = 1): ResultError<string> => {
+export const generateToken = (payload: TokenPayload, ttlHours: number): ResultError<string> => {
     const { AUTH_SECRET } = envVars;
     if (!AUTH_SECRET) return [null, new Error("Missing AUTH_SECRET")];
     return [jwt.sign(payload, AUTH_SECRET, { expiresIn: `${ttlHours}Hours` }), null];

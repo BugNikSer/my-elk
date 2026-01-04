@@ -6,16 +6,16 @@ import { UserCreateInput, UserRole } from "../types/user";
 export class User {
     
     @PrimaryKey()
-    id: bigint;
+    id!: number;
 
     @Property({ nullable: false, unique: true })
-    email: string;
+    email!: string;
 
     @Property({ nullable: false })
-    passwordHash: string;
+    passwordHash!: string;
 
     @Enum(() => UserRole)
-    role: UserRole;
+    role!: UserRole;
 
     constructor({ email, password }: UserCreateInput) {
         this.email = email;

@@ -1,5 +1,5 @@
 import type { CreateHTTPContextOptions } from '@trpc/server/adapters/standalone';
-import { getDataFromCookieTokens, clearCookieTokens, setCookieTokens } from '@my-elk/auth';
+import { getCookiesToken, getDataFromCookieTokens, parseCookies, setCookieTokens } from '@my-elk/auth';
 import { areaLogger } from '../utils/logger';
 
 const logger = areaLogger("trpc-context");
@@ -18,9 +18,9 @@ export async function createTRPCBackendContext({
     const payload = getDataFromCookieTokens({ req, logger });
 
     if (payload === null) {
-        clearCookieTokens({ res });
         return { res, userId: null, accessToken: null, refreshToken: null };
     }
+
     const {
         refresh,
         userId,
@@ -32,7 +32,7 @@ export async function createTRPCBackendContext({
         accessToken,
         refreshToken,
         res,
-        ttlHours: 0.01,
+        ttlHours: 1,
     });
 
     return { res, userId, accessToken, refreshToken }

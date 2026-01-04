@@ -3,6 +3,7 @@ import createLogger from "@my-elk/logger";
 import { generateToken, parseToken } from "./tokens";
 
 export const TOKENS_COOKIE_KEY = "tokens";
+const COOKIES_DEFAULT = " HttpOnly=true; Secure=false; SameSite=None; Path=/";
 
 export const parseCookies = (cookieString = "") => cookieString.split(";").reduce((acc, part) => {
     const [key, value] = part.trim().split("=");
@@ -27,12 +28,12 @@ export const setCookieTokens = ({
     ttlHours?: number;
 }) => res.setHeader(
     `Set-Cookie`,
-    `${TOKENS_COOKIE_KEY}=${JSON.stringify({ accessToken, refreshToken })}; HttpOnly=true; Max-Age=${ttlHours * 3_600_000} Path=/`
+    `${TOKENS_COOKIE_KEY}=${JSON.stringify({ accessToken, refreshToken })}; Max-Age=${ttlHours * 3_600_000}; ${COOKIES_DEFAULT}`
 );
 
 export const clearCookieTokens = ({ res }: { res: CreateHTTPContextOptions["res"]; }) => res.setHeader(
     `Set-Cookie`,
-    `${TOKENS_COOKIE_KEY}=; HttpOnly=true; Max-Age=0 Path=/`
+    `${TOKENS_COOKIE_KEY}=; Max-Age=0; ${COOKIES_DEFAULT}`
 );
 
 export const getDataFromCookieTokens = ({
@@ -76,6 +77,6 @@ export const getDataFromCookieTokens = ({
             return null;
         }
     }
-    
-    return { accessToken: parsedAccessToken, refreshToken: parsedRefreshToken, ...accessTokenPayload, refresh: false };;
+
+    return { accessToken: parsedAccessToken, refreshToken: parsedRefreshToken, ...accessTokenPayload, refresh: false };
 }

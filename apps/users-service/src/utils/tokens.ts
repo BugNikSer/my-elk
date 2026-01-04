@@ -15,7 +15,7 @@ export const setTokens = ({
     logger: ReturnType<typeof areaLogger>;
     methodName: string;
 }) => {
-    const [accessToken, accessTokenError] = generateToken({ userId });
+    const [accessToken, accessTokenError] = generateToken({ userId }, 1);
     const [refreshToken, refreshTokenError] = generateToken({ userId }, 2);
 
     if (accessTokenError || refreshTokenError) {

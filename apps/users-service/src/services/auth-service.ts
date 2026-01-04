@@ -8,9 +8,14 @@ import { hashString } from "../utils/hash";
 const logger = areaLogger("auth-service");
 
 export default {
-    login: async ({ email, password }: { email: string, password: string }): AsyncResultError<User, ServiceError> => {
+    login: async (input: { email: string, password: string }): AsyncResultError<User, ServiceError> => {
+        logger.debug("[login]", )
+        const { email, password } = input;
         const [user, error] = await usersService.getBy({ email });
-        if (error) return [null, error];
+        if (error) {
+            logger.http("[login]", error);
+            return [null, error];
+        }
 
         const hashPwd = hashString(password);
         if (user.passwordHash !== hashPwd) return [

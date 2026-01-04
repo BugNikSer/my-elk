@@ -7,7 +7,7 @@ function Sidebar() {
         <Stack
             sx={(theme) => ({
                 direction: "column",
-                width: "40px",
+                width: "42px",
                 height: "100%",
                 overflow: "hidden",
                 padding: "4px 0",
@@ -17,7 +17,7 @@ function Sidebar() {
             justifyContent="space-between"
         >
             <Stack direction="column" gap="4px">
-                <Moose color="primary" sx={{ width: "1em", height: "1em", fontSize: "1.5rem", margin: "6px" }} />
+                <Moose color="primary" sx={{ width: "1em", height: "1em", fontSize: "1.5rem", margin: "4px 8px" }} />
             </Stack>
             <Stack direction="column" gap="4px">
                 <ThemeSwitch />

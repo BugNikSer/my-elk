@@ -8,6 +8,7 @@ const logger = areaLogger("users-service");
 
 export default {
     getBy: async (input: UserGetByInput): Promise<ResultError<User, ServiceError>> => {
+        logger.debug("[getBy]", input)
         if (!("id" in input) && !("email" in input)) return [
             null,
             {
@@ -25,13 +26,13 @@ export default {
                     code: "NOT_FOUND",
                 },
             ];
-
             return [user, null];
         } catch (e) {
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
     },
     create: async (input: UserCreateInput): AsyncResultError<User, ServiceError> => {
+        logger.debug("[create]", input)
         let user: User;
         const em = orm.em.fork();
 

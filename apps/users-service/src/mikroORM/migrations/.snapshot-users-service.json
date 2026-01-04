@@ -8,12 +8,12 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "bigserial",
+          "type": "serial",
           "unsigned": false,
           "autoincrement": true,
           "primary": true,
           "nullable": false,
-          "mappedType": "bigint"
+          "mappedType": "integer"
         },
         "email": {
           "name": "email",
