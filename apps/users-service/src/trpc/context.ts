@@ -32,7 +32,6 @@ export async function createTRPCBackendContext({
         accessToken,
         refreshToken,
         res,
-        ttlHours: 1,
     });
 
     return { res, userId, accessToken, refreshToken }

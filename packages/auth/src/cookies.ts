@@ -4,6 +4,9 @@ import { generateToken, parseToken } from "./tokens";
 import envVars from "@my-elk/env-vars";
 
 export const TOKENS_COOKIE_KEY = "tokens";
+
+const DEFAULT_TTL_HOURS = 24;
+
 const COOKIES_DEFAULT = `HttpOnly=true; Secure=${
     envVars.ENV === "development" ? "false" : "true"
 }; SameSite=${
@@ -25,7 +28,7 @@ export const setCookieTokens = ({
     accessToken,
     refreshToken,
     res,
-    ttlHours = 3,
+    ttlHours = DEFAULT_TTL_HOURS,
 }: {
     accessToken: string;
     refreshToken: string;
@@ -44,9 +47,11 @@ export const clearCookieTokens = ({ res }: { res: CreateHTTPContextOptions["res"
 export const getDataFromCookieTokens = ({
     req,
     logger,
+    ttlHours = DEFAULT_TTL_HOURS,
 }: {
     req: CreateHTTPContextOptions["req"];
     logger: ReturnType<ReturnType<typeof createLogger>["areaLogger"]>;
+    ttlHours?: number;
 }) => {
     const cookieTokensString = getCookiesToken({ req });
     if (!cookieTokensString) return null;
@@ -72,8 +77,8 @@ export const getDataFromCookieTokens = ({
     if (refreshTokenError) return null;
     if (accessTokenError) {
         if (accessTokenError.message == "jwt expired" && refreshTokenPayload) {
-            const [accessToken, atError] = generateToken(refreshTokenPayload, 1);
-            const [refreshToken, rtError] = generateToken(refreshTokenPayload, 2);
+            const [accessToken, atError] = generateToken(refreshTokenPayload, ttlHours > 0.5 ? - 0.5 : ttlHours);
+            const [refreshToken, rtError] = generateToken(refreshTokenPayload, ttlHours);
 
             if (atError || rtError) return null;
 
