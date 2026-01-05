@@ -15,24 +15,29 @@ export async function createTRPCBackendContext({
     req,
     res,
 }: CreateHTTPContextOptions): Promise<TRPCContext> {
-    const payload = getDataFromCookieTokens({ req, logger });
+    try {
+        const payload = getDataFromCookieTokens({ req, logger });
 
-    if (payload === null) {
-        return { res, userId: null, accessToken: null, refreshToken: null };
+        if (payload === null) {
+            return { res, userId: null, accessToken: null, refreshToken: null };
+        }
+
+        const {
+            refresh,
+            userId,
+            accessToken,
+            refreshToken,
+        } = payload;
+
+        if (refresh) setCookieTokens({
+            accessToken,
+            refreshToken,
+            res,
+        });
+
+        return { res, userId, accessToken, refreshToken }
+    } catch (e) {
+        logger.error(e);
+        throw e;
     }
-
-    const {
-        refresh,
-        userId,
-        accessToken,
-        refreshToken,
-    } = payload;
-
-    if (refresh) setCookieTokens({
-        accessToken,
-        refreshToken,
-        res,
-    });
-
-    return { res, userId, accessToken, refreshToken }
 }

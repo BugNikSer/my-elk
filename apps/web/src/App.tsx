@@ -1,19 +1,32 @@
-import { Stack } from "@mui/material";
-import AuthWrapper from "./features/Auth/AuthWrapper";
-import { Sidebar } from "./features/Sidebar";
+import { StrictMode } from 'react';
+import { ThemeProvider } from "@mui/material/styles";
+import CssBaseline from '@mui/material/CssBaseline';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { RouterProvider, createRouter } from '@tanstack/react-router'
 
-function App() {
-    return (
-        <Stack direction="row" width="100vw" height="100vh" overflow="hidden" alignItems="center" justifyContent="center">
-            <Sidebar />
+import { elkTheme } from "./utils/theme";
+import { queryClient } from "./utils/trpc";
+import { routeTree } from './routeTree.gen';
 
-            <Stack direction="column" width="calc(100vw - 42px)" height="100vh" overflow="hidden">
-                <AuthWrapper>
-                    <span>authed!</span>
-                </AuthWrapper>
-            </Stack>
-        </Stack>
-    )
+const router = createRouter({ routeTree });
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
 }
 
-export default App;
+function AppProviders() {
+  return (
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={elkTheme}>
+          <CssBaseline />
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </StrictMode>
+  )
+}
+
+export default AppProviders
