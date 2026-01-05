@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Alert, Button, IconButton, Stack, TextField } from "@mui/material";
+import { useMemo, useState } from "react";
+import { Button, IconButton, Snackbar, Stack, TextField } from "@mui/material";
 import { Check, VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 
 import { userStore } from "./authStore";
-import { trpc } from "../../utils/trpc";
+import { parseTRPCError, trpcClient } from "../../utils/trpc";
+import { useBoolean } from "usehooks-ts";
 
 function AuthFormSignup() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
+    
+    const loading = useBoolean(false);
+    const [error, setError] = useState<string | null>(null);
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -18,12 +21,13 @@ function AuthFormSignup() {
     const isPasswordValid = useMemo(() => password.length > 2 ,[password]);
     const isPasswordConfirmValid = useMemo(() => isPasswordValid && passwordConfirm === password,[passwordConfirm, password, isPasswordValid])
 
-    const { mutate, error, isPending } = useMutation(trpc.auth.signup.mutationOptions({
-        onSuccess: (data) => {
-            userStore.setState(data)
-        }
-    }))
-    const signup = () => mutate({ email, password });
+    const handleSubmit = async () => {
+        loading.setTrue();
+        await trpcClient.auth.signup.mutate({ email, password })
+            .then((data) => userStore.setState(data))
+            .catch(err => setError(parseTRPCError(err)));
+        loading.setFalse();
+    }
 
     return (
         <>
@@ -47,7 +51,11 @@ function AuthFormSignup() {
                         endAdornment: (
                             <Stack direction="row" alignItems="center">
                                 {isPasswordValid && <Check color="success" />}
-                                <IconButton onMouseDown={() => setShowPassword(true)} onMouseUp={() => setShowPassword(false)}>
+                                <IconButton
+                                    onMouseDown={() => setShowPassword(true)}
+                                    onMouseUp={() => setShowPassword(false)}
+                                    tabIndex={-1}
+                                >
                                     {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                                 </IconButton>
                             </Stack>
@@ -65,7 +73,11 @@ function AuthFormSignup() {
                         endAdornment: (
                             <Stack direction="row" alignItems="center">
                                 {isPasswordConfirmValid && <Check color="success" />}
-                                <IconButton onMouseDown={() => setShowConfirmPassword(true)} onMouseUp={() => setShowConfirmPassword(false)}>
+                                <IconButton
+                                    onMouseDown={() => setShowConfirmPassword(true)}
+                                    onMouseUp={() => setShowConfirmPassword(false)}
+                                    tabIndex={-1}
+                                >
                                     {showConfirmPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
                                 </IconButton>
                             </Stack>
@@ -73,22 +85,20 @@ function AuthFormSignup() {
                     },
                 }}
             />
-            {Boolean(error) && (
-                <Alert
-                    severity="error"
-                    title="Sign up failed"
-                >
-                    {[error?.message, error?.data?.code].filter(Boolean).join(": ")}    
-                </Alert>
-            )}
             <Button
-                onClick={signup}
-                loading={isPending}
+                onClick={handleSubmit}
+                loading={loading.value}
                 disabled={!(isEmailValid && isPasswordValid)}
                 variant="contained"
             >
                 Sign up
             </Button>
+            <Snackbar
+                open={Boolean(error)}
+                autoHideDuration={6000}
+                onClose={() => setError(null)}
+                message={error}
+            />
         </>
     )
 }

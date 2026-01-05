@@ -1,23 +1,28 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Alert, Button, TextField } from "@mui/material";
+import { useMemo, useState } from "react";
+import { useBoolean } from "usehooks-ts";
+import { Button, Snackbar, TextField } from "@mui/material";
 import { Check } from "@mui/icons-material";
 
 import { userStore } from "./authStore";
-import { trpc } from "../../utils/trpc";
+import { parseTRPCError, trpcClient } from "../../utils/trpc";
 
 function AuthFormLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const loading = useBoolean(false);
+    const [error, setError] = useState<string | null>(null);
+
     const isEmailValid = useMemo(() => /[a-zA-Z0-9]+\@[a-zA-Z0-9]+\.[a-zA-Z]+/.test(email), [email]);
     const isPasswordValid = useMemo(() => password.length > 2 ,[password]);
 
-    const { data, error, isLoading, refetch } = useQuery(trpc.auth.login.queryOptions({ email, password }));
-
-    useEffect(() => {
-        if (data) userStore.setState(data)
-    }, [data])
+    const handleSubmit = async () => {
+        loading.setTrue();
+        await trpcClient.auth.login.query({ email, password })
+            .then((data) => userStore.setState(data))
+            .catch((err) => setError(parseTRPCError(err)));
+        loading.setFalse();
+    };
 
     return (
         <>
@@ -41,17 +46,15 @@ function AuthFormLogin() {
                     }
                 }}
             />
-            {Boolean(error) && (
-                <Alert
-                    severity="error"
-                    title="Log in failed"
-                >
-                    {[error?.message, error?.data?.code].filter(Boolean).join(": ")}    
-                </Alert>
-            )}
+            <Snackbar
+                open={Boolean(error)}
+                autoHideDuration={6000}
+                onClose={() => setError(null)}
+                message={error}
+            />
             <Button
-                onClick={() => refetch()}
-                loading={isLoading}
+                onClick={handleSubmit}
+                loading={loading.value}
                 disabled={!(isEmailValid && isPasswordValid)}
                 variant="contained"
             >

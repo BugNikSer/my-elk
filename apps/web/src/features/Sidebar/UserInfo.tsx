@@ -1,30 +1,35 @@
+import { useState } from "react";
+import { useBoolean } from "usehooks-ts";
 import { useStore } from "@tanstack/react-store";
+import { Button, Snackbar, Stack, Typography } from "@mui/material";
 
 import { userStore } from "../Auth/authStore";
-import { Button, Stack, Typography } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { trpc } from "../../utils/trpc";
-import { useEffect } from "react";
+import { parseTRPCError, trpcClient } from "../../utils/trpc";
 
 function UserInfo() {
     const user = useStore(userStore);
 
-    const { refetch, error, data, isLoading } = useQuery(trpc.auth.logout.queryOptions(undefined));
+    const loading = useBoolean(false);
+    const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        // TODO: notification
-        console.log(error)
-    }, [error]);
-
-    useEffect(() => {
-        console.log(data)
-        if (data) userStore.setState(null)
-    }, [data])
+    const handleLogout = async () => {
+        loading.setTrue();
+        await trpcClient.auth.logout.query()
+            .then(() => userStore.setState(null))
+            .catch(err => setError(parseTRPCError(err)));
+        loading.setFalse();
+    }
 
     if (user) return (
         <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Typography>{user.email}</Typography>
-            <Button onClick={() => refetch()} loading={isLoading}>Log out</Button>
+            <Button onClick={handleLogout} loading={loading.value}>Log out</Button>
+            <Snackbar
+                open={Boolean(error)}
+                autoHideDuration={6000}
+                onClose={() => setError(null)}
+                message={error}
+            />
         </Stack>
     )
 
