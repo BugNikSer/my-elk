@@ -20,7 +20,6 @@ function AuthWrapper({ children } : PropsWithChildren) {
     }));
 
     useEffect(() => {
-        console.log("AuthWrapper", { user, data })
         if (!user && data) {
             userStore.setState(data);
         }

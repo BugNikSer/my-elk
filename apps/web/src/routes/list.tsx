@@ -5,5 +5,5 @@ export const Route = createFileRoute('/list')({
 });
 
 function List() {
-    return <span>List</span>
+  return <span>List</span>;
 }

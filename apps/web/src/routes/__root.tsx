@@ -4,7 +4,7 @@ import { Stack } from '@mui/material';
 import AuthWrapper from '../features/Auth/AuthWrapper';
 import { Sidebar } from '../features';
 
-const SIDEBAR_WIDTH = 50;
+const SIDEBAR_WIDTH = 58;
 
 function RootLayout() {
     return (
