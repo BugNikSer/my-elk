@@ -1,8 +1,10 @@
+import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
+import { createEntity } from "@my-elk/helpers";
+
 import { UserCreateInput, UserGetByInput } from "../mikroORM/types/user";
 import { areaLogger } from "../utils/logger";
 import { orm } from "../mikroORM";
 import { User } from "../mikroORM/entities/user.entity";
-import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
 
 const logger = areaLogger("users-service");
 
@@ -31,32 +33,10 @@ export default {
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
     },
-    create: async (input: UserCreateInput): AsyncResultError<User, ServiceError> => {
-        logger.debug("[create]", input)
-        let user: User;
-        const em = orm.em.fork();
-
-        try {
-            user = new User(input);
-        } catch (e) {
-            logger.warn("Failed to create User class instance", e);
-            return [null, { error: e as Error, code: "BAD_REQUEST"}];
-        }
-
-        try {
-            em.persist(user);
-        } catch (e) {
-            logger.warn("Failed to insert User", e);
-            return [null, { error: e as Error, code: "CONFLICT"}];
-        }
-        
-        try {
-            await em.flush();
-        } catch (e) {
-            logger.warn("Failed to save changes after inserting User", e);
-            return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR"}];
-        }
-
-        return [user, null];
-    }
+    create: async (input: UserCreateInput): AsyncResultError<User, ServiceError> => createEntity({
+        Entity: User,
+        input,
+        orm,
+        logger,
+    })
 };

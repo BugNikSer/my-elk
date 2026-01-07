@@ -4,7 +4,6 @@ import { TRPCContext } from "./context";
 const trpcInstance = initTRPC.context<TRPCContext>().create();
 
 export const router = trpcInstance.router;
-export const publicProcedure = trpcInstance.procedure;
 export const authedProcedure = trpcInstance.procedure.use(async function isAuthed(opts) {
     const { ctx } = opts;
 

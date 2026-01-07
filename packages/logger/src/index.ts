@@ -91,3 +91,5 @@ const createLogger = ({
 };
 
 export default createLogger;
+
+export type AreaLogger = ReturnType<ReturnType<typeof createLogger>["areaLogger"]>;

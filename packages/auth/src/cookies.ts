@@ -1,5 +1,5 @@
 import { CreateHTTPContextOptions } from "@trpc/server/adapters/standalone";
-import createLogger from "@my-elk/logger";
+import { AreaLogger } from "@my-elk/logger";
 import { generateToken, parseToken } from "./tokens";
 import envVars from "@my-elk/env-vars";
 
@@ -50,7 +50,7 @@ export const getDataFromCookieTokens = ({
     ttlHours = DEFAULT_TTL_HOURS,
 }: {
     req: CreateHTTPContextOptions["req"];
-    logger: ReturnType<ReturnType<typeof createLogger>["areaLogger"]>;
+    logger: AreaLogger;
     ttlHours?: number;
 }) => {
     const cookieTokensString = getCookiesToken({ req });

@@ -4,13 +4,36 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx ts-node src/index.ts",
+    "migration:create": "npx mikro-orm migration:create",
+    "migration:up": "npx mikro-orm migration:up",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.27.0",
   "dependencies": {
+    "@mikro-orm/cli": "^6.6.2",
+    "@mikro-orm/core": "^6.6.2",
+    "@mikro-orm/migrations": "^6.6.2",
+    "@mikro-orm/postgresql": "^6.6.2",
+    "@mikro-orm/reflection": "^6.6.2",
+    "@mikro-orm/sql-highlighter": "^1.0.1",
+    "@my-elk/auth": "workspace:*",
+    "@my-elk/env-vars": "workspace:*",
+    "@my-elk/helpers": "workspace:*",
+    "@my-elk/logger": "workspace:*",
+    "@my-elk/result-error": "workspace:*",
+    "@trpc/server": "^11.8.1",
+    "cors": "^2.8.5",
+    "zod": "^4.3.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/node": "^25.0.3",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
 }

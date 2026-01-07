@@ -24,16 +24,15 @@
     "@mikro-orm/sql-highlighter": "^1.0.1",
     "@my-elk/auth": "workspace:*",
     "@my-elk/env-vars": "workspace:*",
+    "@my-elk/helpers": "workspace:*",
     "@my-elk/logger": "workspace:*",
     "@my-elk/result-error": "workspace:*",
     "@trpc/server": "^11.8.1",
     "cors": "^2.8.5",
-    "jsonwebtoken": "^9.0.3",
     "zod": "^4.3.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

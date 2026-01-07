@@ -1,0 +1,21 @@
+{
+  "name": "@my-elk/helpers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.27.0",
+  "dependencies": {
+    "@mikro-orm/core": "^6.6.2",
+    "@mikro-orm/postgresql": "^6.6.2",
+    "@my-elk/logger": "workspace:*",
+    "@my-elk/result-error": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

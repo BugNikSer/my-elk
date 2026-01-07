@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.backend.json",
+  "compilerOptions": {
+    "target": "ES6",
+    "allowJs": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+}

@@ -14,12 +14,18 @@ const stringVars = [
     "USERS_SERVICE_POSTGRES_DB",
     "USERS_SERVICE_POSTGRES_USER",
     "USERS_SERVICE_POSTGRES_PASSWORD",
+    "EXPENSES_SERVICE_HOST",
+    "EXPENSES_SERVICE_POSTGRES_DB",
+    "EXPENSES_SERVICE_POSTGRES_USER",
+    "EXPENSES_SERVICE_POSTGRES_PASSWORD",
 ] as const;
 type StringVars = TypedVars<typeof stringVars, string>;
 
 const numberVars = [
     "USERS_SERVICE_PORT",
     "USERS_SERVICE_POSTGRES_PORT",
+    "EXPENSES_SERVICE_PORT",
+    "EXPENSES_SERVICE_POSTGRES_PORT",
 ] as const;
 type NumberVars = TypedVars<typeof numberVars, number>;
 
