@@ -23,7 +23,7 @@ export class Expense {
     @ManyToOne(() => Kind, { ref: true })
     kind!: Kind;
 
-    @ManyToMany(() => Tag, tag => tag.expenses)
+    @ManyToMany(() => Tag)
     tags = new Collection<Tag>(this);
 
     @Property()
