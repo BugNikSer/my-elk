@@ -1,7 +1,7 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/postgresql";
 
-@Entity()
-export class BaseTag {
+@Entity({ abstract: true })
+export abstract class BaseTag {
 
     @PrimaryKey()
     id!: number;

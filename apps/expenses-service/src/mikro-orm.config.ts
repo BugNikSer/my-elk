@@ -8,8 +8,8 @@ import envVars from "@my-elk/env-vars";
 import { areaLogger } from "./utils/logger";
 
 const config = {
-    entities: ["./src/mikroORM/entities"],
-    entitiesTS: ["./src/mikroORM/entities"],
+    entities: ["./src/mikroORM/entities/*.entity.ts"],
+    entitiesTS: ["./src/mikroORM/entities/*.entity.ts"],
     baseDir: process.cwd(),
     dbName: envVars.EXPENSES_SERVICE_POSTGRES_DB,
     host: envVars.EXPENSES_SERVICE_HOST,
