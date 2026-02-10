@@ -1,23 +1,23 @@
 import { orm } from "../mikroORM";
 import { createEntity } from "@my-elk/helpers";
 
-import { Category } from "../mikroORM/entities";
+import { Kind } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
-const logger = areaLogger("categories-service");
+const logger = areaLogger("kinds-service");
 
 export default {
-    create: async (input: { name: string; userId: number }): AsyncResultError<Category, ServiceError> => createEntity({
-        Entity: Category,
+    create: async (input: { name: string; userId: number }): AsyncResultError<Kind, ServiceError> => createEntity({
+        Entity: Kind,
         input,
         orm,
         logger,
     }),
-    getUsers: async (input: { userId: number }): AsyncResultError<Category[], ServiceError> => {
+    getUsers: async (input: { userId: number }): AsyncResultError<Kind[], ServiceError> => {
         try {
-            const categories = await orm.em.fork().find(Category, input);
-            return [categories, null];
+            const kinds = await orm.em.fork().find(Kind, input);
+            return [kinds, null];
         } catch (e) {
             logger.warn("[getAll]", e);
             return [
@@ -29,17 +29,17 @@ export default {
             ];
         }
     },
-    getOne: async (input: { id: number, userId: number }): AsyncResultError<Category, ServiceError> => {
+    getOne: async (input: { id: number, userId: number }): AsyncResultError<Kind, ServiceError> => {
         try {
-            const category = await orm.em.fork().findOne(Category, input);
-            if (!category) return [
+            const kind = await orm.em.fork().findOne(Kind, input);
+            if (!kind) return [
                 null,
                 {
                     code: "NOT_FOUND",
-                    error: new Error("Category not found"),
+                    error: new Error("kind not found"),
                 },
             ];
-            return [category, null];
+            return [kind, null];
         } catch (e) {
             logger.warn("[getOne]", e);
             return [

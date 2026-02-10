@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, Property, Ref } from "@mikro-orm/postgresql";
+import { Entity, ManyToOne } from "@mikro-orm/postgresql";
 import { BaseTag } from "./baseTag";
 import { Category } from "./category.entity";
 import { Kind } from "./kind.entity";
@@ -12,4 +12,19 @@ export class Product extends BaseTag {
     @ManyToOne(() => Kind, { nullable: true })
     defaultKind?: Kind;
 
+    constructor({
+        name,
+        userId,
+        defaultCategory,
+        defaultKind,
+    }: {
+        name: string;
+        userId: number;
+        defaultCategory?: Category;
+        defaultKind?: Kind;
+    }) {
+        super({ name, userId });
+        this.defaultCategory = defaultCategory;
+        this.defaultKind = defaultKind;
+    }
 };

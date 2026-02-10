@@ -9,16 +9,18 @@ export const createEntity = async <E, P>({
     input,
     orm,
     logger,
+    skipFirstLogging,
 }: {
     Entity: new (params: P) => E;
     input: P;
     orm: MikroORM<PostgreSqlDriver, SqlEntityManager<PostgreSqlDriver> & EntityManager<IDatabaseDriver<Connection>>>;
     logger: AreaLogger;
+    skipFirstLogging?: boolean;
 }): AsyncResultError<E, ServiceError> => {
-        logger.debug("[create]", input);
+        if (!skipFirstLogging) logger.debug("[create]", input);
 
         let entity: E;
-        const em = orm.em.fork()
+        const em = orm.em.fork();
 
         try {
             entity = new Entity(input);
