@@ -8,6 +8,7 @@ const logger = areaLogger("init-orm");
 export let orm: MikroORM<PostgreSqlDriver>;
 
 export const initMikroORM = async () => {
+    logger.info("Initializing...");
     try {
         orm = await MikroORM.init(mikroORMConfig);
         logger.info("Initialized");

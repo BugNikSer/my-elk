@@ -33,9 +33,9 @@ export default {
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
     },
-    create: async (input: UserCreateInput): AsyncResultError<User, ServiceError> => createEntity({
+    create: async (body: UserCreateInput): AsyncResultError<User, ServiceError> => createEntity({
         Entity: User,
-        input,
+        body,
         orm,
         logger,
     })

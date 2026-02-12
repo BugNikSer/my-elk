@@ -1,37 +1,23 @@
 import { orm } from "../mikroORM";
 import { createEntity } from "@my-elk/helpers";
+import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { Kind } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 const logger = areaLogger("kinds-service");
 
 export default {
-    create: async (input: { name: string; userId: number }): AsyncResultError<Kind, ServiceError> => createEntity({
+    create: async (body: { name: string; userId: number }): AsyncResultError<Kind, ServiceError> => createEntity({
         Entity: Kind,
-        input,
+        body,
         orm,
         logger,
     }),
-    getUsers: async (input: { userId: number }): AsyncResultError<Kind[], ServiceError> => {
+    getOne: async (where: { id: number, userId: number }): AsyncResultError<Kind, ServiceError> => {
+        logger.debug("[getOne]", where);
         try {
-            const kinds = await orm.em.fork().find(Kind, input);
-            return [kinds, null];
-        } catch (e) {
-            logger.warn("[getAll]", e);
-            return [
-                null,
-                {
-                    code: "INTERNAL_SERVER_ERROR",
-                    error: e as Error,
-                },
-            ];
-        }
-    },
-    getOne: async (input: { id: number, userId: number }): AsyncResultError<Kind, ServiceError> => {
-        try {
-            const kind = await orm.em.fork().findOne(Kind, input);
+            const kind = await orm.em.fork().findOne(Kind, where);
             if (!kind) return [
                 null,
                 {
@@ -42,6 +28,22 @@ export default {
             return [kind, null];
         } catch (e) {
             logger.warn("[getOne]", e);
+            return [
+                null,
+                {
+                    code: "INTERNAL_SERVER_ERROR",
+                    error: e as Error,
+                },
+            ];
+        }
+    },
+    getMany: async (where: { userId: number }): AsyncResultError<Kind[], ServiceError> => {
+        logger.debug("[getMany]", where);
+        try {
+            const kinds = await orm.em.fork().find(Kind, where);
+            return [kinds, null];
+        } catch (e) {
+            logger.warn("[getMany]", e);
             return [
                 null,
                 {

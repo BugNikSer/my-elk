@@ -12,4 +12,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"],
+  "exclude": ["src/mikroORM/migrations/*"],
 }

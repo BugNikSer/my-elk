@@ -3,38 +3,38 @@ import { handleServiceError } from "@my-elk/helpers/dist/serviceHelpers";
 
 import { authedProcedure } from "../trpc";
 import { areaLogger } from "../../utils/logger";
-import tagsService from "../../services/tags-service";
+import purchasesService from "../../services/purchases-service";
 import { notAuthedError } from "./constants";
 
-const logger = areaLogger("tags-router");
+const logger = areaLogger("purchases-router");
 
 export default {
     create: authedProcedure
-        .input(z.object({ name: z.string() }))
+        .input(z.object({
+            userId: z.number(),
+            productId: z.number(),
+            categoryId: z.number(),
+            kindId: z.number(),
+            tagIds: z.array(z.number()),
+        }))
         .mutation(async ({ input, ctx }) => {
             logger.debug("[create]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            const result = await tagsService.create({ name: input.name, userId: ctx.userId });
+            const result = await purchasesService.create({ ...input, userId: ctx.userId });
             return handleServiceError({
                 result,
-                methodName: "tags.create",
+                methodName: "purchases.create",
                 logger,
             });
         }),
     getMany: authedProcedure
-        .input(z.object({
-            id: z.union([
-                z.number(),
-                z.array(z.number()),
-            ]).optional(),
-        }))
-        .query(async ({ input, ctx }) => {
+        .query(async ({ ctx }) => {
             logger.debug("[getMany]", ctx.userId);
             if (!ctx.userId) throw notAuthedError;
-            const result = await tagsService.getMany({ ...input, userId: ctx.userId });
+            const result = await purchasesService.getMany({ userId: ctx.userId });
             return handleServiceError({
                 result,
-                methodName: "tags.getMany",
+                methodName: "purchases.getMany",
                 logger,
             });
         }),
@@ -43,10 +43,10 @@ export default {
         .query(async ({ input, ctx }) => {
             logger.debug("[getOne]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            const result = await tagsService.getOne({ id: input.id, userId: ctx.userId });
+            const result = await purchasesService.getOne({ id: input.id, userId: ctx.userId });
             return handleServiceError({
                 result,
-                methodName: "tags.getOne",
+                methodName: "purchases.getOne",
                 logger,
             });
         })

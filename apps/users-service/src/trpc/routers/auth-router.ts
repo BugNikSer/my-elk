@@ -73,8 +73,6 @@ export default router({
         if (userId === null) return null;
 
         const userResult = await usersService.getBy({ id: userId });
-        const user = handleUserError({ userResult, methodName: "check" });
-
-        return user;
+        return handleUserError({ userResult, methodName: "check" });
     }),
 })

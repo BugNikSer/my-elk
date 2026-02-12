@@ -254,11 +254,11 @@
           "mappedType": "datetime"
         }
       },
-      "name": "expense",
+      "name": "purchase",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "expense_pkey",
+          "keyName": "purchase_pkey",
           "columnNames": [
             "id"
           ],
@@ -270,36 +270,36 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "expense_product_id_foreign": {
-          "constraintName": "expense_product_id_foreign",
+        "purchase_product_id_foreign": {
+          "constraintName": "purchase_product_id_foreign",
           "columnNames": [
             "product_id"
           ],
-          "localTableName": "public.expense",
+          "localTableName": "public.purchase",
           "referencedColumnNames": [
             "id"
           ],
           "referencedTableName": "public.product",
           "updateRule": "cascade"
         },
-        "expense_category_id_foreign": {
-          "constraintName": "expense_category_id_foreign",
+        "purchase_category_id_foreign": {
+          "constraintName": "purchase_category_id_foreign",
           "columnNames": [
             "category_id"
           ],
-          "localTableName": "public.expense",
+          "localTableName": "public.purchase",
           "referencedColumnNames": [
             "id"
           ],
           "referencedTableName": "public.category",
           "updateRule": "cascade"
         },
-        "expense_kind_id_foreign": {
-          "constraintName": "expense_kind_id_foreign",
+        "purchase_kind_id_foreign": {
+          "constraintName": "purchase_kind_id_foreign",
           "columnNames": [
             "kind_id"
           ],
-          "localTableName": "public.expense",
+          "localTableName": "public.purchase",
           "referencedColumnNames": [
             "id"
           ],
@@ -360,8 +360,8 @@
     },
     {
       "columns": {
-        "expense_id": {
-          "name": "expense_id",
+        "purchase_id": {
+          "name": "purchase_id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -379,13 +379,13 @@
           "mappedType": "integer"
         }
       },
-      "name": "expense_tags",
+      "name": "purchase_tags",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "expense_tags_pkey",
+          "keyName": "purchase_tags_pkey",
           "columnNames": [
-            "expense_id",
+            "purchase_id",
             "tag_id"
           ],
           "composite": true,
@@ -396,25 +396,25 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "expense_tags_expense_id_foreign": {
-          "constraintName": "expense_tags_expense_id_foreign",
+        "purchase_tags_purchase_id_foreign": {
+          "constraintName": "purchase_tags_purchase_id_foreign",
           "columnNames": [
-            "expense_id"
+            "purchase_id"
           ],
-          "localTableName": "public.expense_tags",
+          "localTableName": "public.purchase_tags",
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.expense",
+          "referencedTableName": "public.purchase",
           "deleteRule": "cascade",
           "updateRule": "cascade"
         },
-        "expense_tags_tag_id_foreign": {
-          "constraintName": "expense_tags_tag_id_foreign",
+        "purchase_tags_tag_id_foreign": {
+          "constraintName": "purchase_tags_tag_id_foreign",
           "columnNames": [
             "tag_id"
           ],
-          "localTableName": "public.expense_tags",
+          "localTableName": "public.purchase_tags",
           "referencedColumnNames": [
             "id"
           ],

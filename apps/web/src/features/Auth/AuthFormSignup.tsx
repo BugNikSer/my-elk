@@ -3,7 +3,7 @@ import { Button, IconButton, Snackbar, Stack, TextField } from "@mui/material";
 import { Check, VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 
 import { userStore } from "./authStore";
-import { parseTRPCError, trpcClient } from "../../utils/trpc";
+import { parseTRPCError, usersTrpcClient } from "../../utils/trpc";
 import { useBoolean } from "usehooks-ts";
 
 function AuthFormSignup() {
@@ -23,7 +23,7 @@ function AuthFormSignup() {
 
     const handleSubmit = async () => {
         loading.setTrue();
-        await trpcClient.auth.signup.mutate({ email, password })
+        await usersTrpcClient.auth.signup.mutate({ email, password })
             .then((data) => userStore.setState(data))
             .catch(err => setError(parseTRPCError(err)));
         loading.setFalse();

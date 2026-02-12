@@ -1,55 +1,76 @@
 import { type TRPC_ERROR_CODE_KEY } from "@trpc/server";
-import { createEntity } from "@my-elk/helpers";
+import { createEntity, preloadLinkedEntities } from "@my-elk/helpers";
+import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
 import { Product } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 import categoriesService from "./categories-service";
 import kindsService from "./kinds-service";
 
 const logger = areaLogger("products-service");
 
 export default {
-    create: async(input: {
+    create: async(body: {
         name: string;
         userId: number;
         defaultCategoryId?: number;
         defaultKindId?: number;
     }): AsyncResultError<Product, ServiceError> => {
-        logger.debug("[create]", input);
+        logger.debug("[create]", body);
 
-        const { name, userId, defaultCategoryId, defaultKindId } = input;
-        const body: ConstructorParameters<typeof Product>[0] = { name, userId };
+        const { name, userId, defaultCategoryId, defaultKindId } = body;
+        const processedBody: ConstructorParameters<typeof Product>[0] = { name, userId };
 
-        const productDefaultLinks = [
-            { service: categoriesService, field: "defaultCategory", id: defaultCategoryId },
-            { service: kindsService, field: "defaultKind", id: defaultKindId },
-        ] as const;
+        const preloadError = await preloadLinkedEntities({
+            body: processedBody,
+            userId,
+            config: [
+                { service: categoriesService, field: "defaultCategory", id: defaultCategoryId } as const,
+                { service: kindsService, field: "defaultKind", id: defaultKindId } as const,
+            ],
+        });
+        if (preloadError) return [null, preloadError];
 
-        const errors = await Promise.all(productDefaultLinks.map(async ({ service, field, id }) => {
-            if (id === undefined) return null;
-            const [result, error] = await service.getOne({ id, userId });
-            if (error) return error;
-            body[field] = result;
-            return null;
-        }));
-
-        const filteredErrors = errors.filter(er => er !== null);
-        if (filteredErrors.length) {
-            let worstErrorCode: TRPC_ERROR_CODE_KEY = "NOT_FOUND";
-            if (filteredErrors.some((e) => e.code === "INTERNAL_SERVER_ERROR")) {
-                worstErrorCode = "INTERNAL_SERVER_ERROR";
-            }
+        return createEntity({ Entity: Product, body: processedBody, logger, orm, skipFirstLogging: true });
+    },
+    getOne: async (where: { id: number, userId: number; }): AsyncResultError<Product, ServiceError> => {
+        logger.debug("[getOne]", where);
+        try {
+            const product = await orm.em.fork().findOne(Product, where);
+            if (!product) return [
+                null,
+                {
+                    code: "NOT_FOUND",
+                    error: new Error("product not found"),
+                },
+            ];
+            return [product, null];
+        } catch (e) {
+            logger.warn("[getOne]", e);
             return [
                 null,
                 {
-                    code: worstErrorCode,
-                    error: new Error(filteredErrors.map(e => e.error.message).join(". ")),
+                    code: "INTERNAL_SERVER_ERROR",
+                    error: e as Error,
                 },
             ];
         }
-
-        return createEntity({ Entity: Product, input: body, logger, orm, skipFirstLogging: true });
-    }
+    },
+    getMany: async(where: { userId: number }): AsyncResultError<Product[], ServiceError> => {
+        logger.debug("[getMany]", where);
+        try {
+            const kinds = await orm.em.fork().find(Product, where);
+            return [kinds, null];
+        } catch (e) {
+            logger.warn("[getMany]", e);
+            return [
+                null,
+                {
+                    code: "INTERNAL_SERVER_ERROR",
+                    error: e as Error,
+                },
+            ];
+        }
+    },
 };

@@ -4,28 +4,44 @@ import { authedProcedure } from "../trpc";
 import { areaLogger } from "../../utils/logger";
 import categoriesService from "../../services/categories-service";
 import { notAuthedError } from "./constants";
+import { handleServiceError } from "@my-elk/helpers";
 
 const logger = areaLogger("categories-router");
 
 export default {
     create: authedProcedure
         .input(z.object({ name: z.string() }))
-        .mutation(({ input, ctx }) => {
+        .mutation(async ({ input, ctx }) => {
             logger.debug("[create]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            return categoriesService.create({ name: input.name, userId: ctx.userId });
+            const result = await categoriesService.create({ name: input.name, userId: ctx.userId });
+            return handleServiceError({
+                result,
+                methodName: "categories.create",
+                logger,
+            });
         }),
-    getUsers: authedProcedure
+    getMany: authedProcedure
         .query(async ({ ctx }) => {
-            logger.debug("[getAll]", ctx.userId);
+            logger.debug("[getMany]", ctx.userId);
             if (!ctx.userId) throw notAuthedError;
-            return categoriesService.getUsers({ userId: ctx.userId });
+            const result = await categoriesService.getMany({ userId: ctx.userId });
+            return handleServiceError({
+                result,
+                methodName: "categories.getMany",
+                logger,
+            })
         }),
     getOne: authedProcedure
         .input(z.object({ id: z.number() }))
         .query(async ({ input, ctx }) => {
             logger.debug("[getOne]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            return categoriesService.getOne({ id: input.id, userId: ctx.userId });
+            const result = await categoriesService.getOne({ id: input.id, userId: ctx.userId });
+            return handleServiceError({
+                result,
+                methodName: "categories.getOne",
+                logger,
+            });
         })
 };

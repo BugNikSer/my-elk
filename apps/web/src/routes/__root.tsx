@@ -29,7 +29,7 @@ function RootLayout() {
                     </AuthWrapper>
                 </Stack>
             </Stack>
-            <TanStackRouterDevtools position='bottom-right' />
+            <TanStackRouterDevtools position='bottom-left' />
         </>
     )
 };

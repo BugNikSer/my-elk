@@ -5,13 +5,13 @@ import { Alert, AlertTitle, CircularProgress, IconButton } from "@mui/material";
 import { Refresh } from '@mui/icons-material';
 
 import { userStore } from "./authStore";
-import { trpc } from "../../utils/trpc";
+import { usersTrpc } from "../../utils/trpc";
 import AuthForm from "./AuthForm";
 
 function AuthWrapper({ children } : PropsWithChildren) {
     const user = useStore(userStore);
 
-    const { data, error, isLoading, refetch } = useQuery(trpc.auth.check.queryOptions(undefined, {
+    const { data, error, isLoading, refetch } = useQuery(usersTrpc.auth.check.queryOptions(undefined, {
         retry: (failureCount, err) => {
             if (err.data?.code === "UNAUTHORIZED") return false;
             if (failureCount > 2) return false;

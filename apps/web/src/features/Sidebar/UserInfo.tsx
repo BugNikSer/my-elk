@@ -4,7 +4,7 @@ import { useStore } from "@tanstack/react-store";
 import { Button, Snackbar, Stack, Typography } from "@mui/material";
 
 import { userStore } from "../Auth/authStore";
-import { parseTRPCError, trpcClient } from "../../utils/trpc";
+import { parseTRPCError, usersTrpcClient } from "../../utils/trpc";
 
 function UserInfo() {
     const user = useStore(userStore);
@@ -14,7 +14,7 @@ function UserInfo() {
 
     const handleLogout = async () => {
         loading.setTrue();
-        await trpcClient.auth.logout.query()
+        await usersTrpcClient.auth.logout.query()
             .then(() => userStore.setState(null))
             .catch(err => setError(parseTRPCError(err)));
         loading.setFalse();

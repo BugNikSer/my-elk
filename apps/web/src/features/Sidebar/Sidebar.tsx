@@ -1,13 +1,23 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { IconButton, Stack } from "@mui/material"
-import { FormatListNumberedOutlined } from "@mui/icons-material";
+import { IconButton, Stack, Tooltip } from "@mui/material"
+import {
+    CategoryOutlined,
+    BookmarkBorderOutlined,
+    LocalOfferOutlined,
+    CardGiftcardOutlined,
+    ShoppingCartOutlined,
+} from "@mui/icons-material";
 
 import InfoBlock from "./InfoBlock";
 import Moose from "../../components/icons/Moose";
 
 const pages = [
-    { path: "/", Icon: Moose },
-    { path: "/list", Icon: FormatListNumberedOutlined },
+    { path: "/", Icon: Moose, label: "Home" },
+    { path: "/purchases", Icon: ShoppingCartOutlined, label: "Purchases", },
+    { path: "/products", Icon: CardGiftcardOutlined, label: "Products", },
+    { path: "/categories", Icon: CategoryOutlined, label: "Categories", },
+    { path: "/kinds", Icon: BookmarkBorderOutlined, label: "Kinds", },
+    { path: "/tags", Icon: LocalOfferOutlined, label: "Tags", },
 ] as const;
 
 function Sidebar({ width }: { width: number }) {
@@ -29,11 +39,13 @@ function Sidebar({ width }: { width: number }) {
             justifyContent="space-between"
         >
             <Stack direction="column" gap="4px">
-                {pages.map(({ path, Icon }) => (
+                {pages.map(({ path, Icon, label }) => (
                     <Link to={path}>
-                        <IconButton size="medium" color={path === pathname ? "primary" : undefined}>
-                            <Icon />
-                        </IconButton>
+                        <Tooltip placement="right" title={label}>
+                            <IconButton size="medium" color={path === pathname ? "primary" : undefined}>
+                                <Icon />
+                            </IconButton>
+                        </Tooltip>
                     </Link>
                 ))}
             </Stack>

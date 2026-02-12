@@ -18,10 +18,10 @@
     "resolveJsonModule": true,
   },
   "exclude": ["node_modules"],
-  "paths": {
-    "@users-service/*": ["./apps/users-service"],
-    "@expenses-service/*": ["./apps/expenses-service"],
-    "@logger/*": ["./packages/logger/*"],
-    "@env-vars/*": ["./packages/env-vars/*"],
-  },
+  // "paths": {
+  //   "@users-service/*": ["./apps/users-service"],
+  //   "@expenses-service/*": ["./apps/expenses-service"],
+  //   "@logger/*": ["./packages/logger/*"],
+  //   "@env-vars/*": ["./packages/env-vars/*"],
+  // },
 }

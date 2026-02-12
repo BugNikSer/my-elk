@@ -77,8 +77,9 @@ export const getDataFromCookieTokens = ({
     if (refreshTokenError) return null;
     if (accessTokenError) {
         if (accessTokenError.message == "jwt expired" && refreshTokenPayload) {
-            const [accessToken, atError] = generateToken(refreshTokenPayload, ttlHours > 0.5 ? - 0.5 : ttlHours);
-            const [refreshToken, rtError] = generateToken(refreshTokenPayload, ttlHours);
+            const { userId } = refreshTokenPayload;
+            const [accessToken, atError] = generateToken({ userId }, ttlHours > 0.5 ? - 0.5 : ttlHours);
+            const [refreshToken, rtError] = generateToken({ userId }, ttlHours);
 
             if (atError || rtError) return null;
 

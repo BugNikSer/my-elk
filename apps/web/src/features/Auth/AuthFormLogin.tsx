@@ -4,7 +4,7 @@ import { Button, Snackbar, TextField } from "@mui/material";
 import { Check } from "@mui/icons-material";
 
 import { userStore } from "./authStore";
-import { parseTRPCError, trpcClient } from "../../utils/trpc";
+import { parseTRPCError, usersTrpcClient } from "../../utils/trpc";
 
 function AuthFormLogin() {
     const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ function AuthFormLogin() {
 
     const handleSubmit = async () => {
         loading.setTrue();
-        await trpcClient.auth.login.query({ email, password })
+        await usersTrpcClient.auth.login.query({ email, password })
             .then((data) => userStore.setState(data))
             .catch((err) => setError(parseTRPCError(err)));
         loading.setFalse();

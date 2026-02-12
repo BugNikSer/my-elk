@@ -6,7 +6,7 @@ import { Product } from "./product.entity";
 import { Tag } from "./tag.entity";
 
 @Entity()
-export class Expense {
+export class Purchase {
 
     @PrimaryKey()
     id!: number;
@@ -29,4 +29,24 @@ export class Expense {
     @Property()
     date!: Date;
 
+    constructor({
+        userId,
+        product,
+        category,
+        kind,
+        tags,
+    }: {
+        userId: number;
+        product: Product;
+        category: Category;
+        kind: Kind;
+        tags: Tag[];
+    }) {
+        this.userId = userId;
+        this.product = product;
+        this.category = category;
+        this.kind = kind;
+        tags.forEach(tag => this.tags.add(tag));
+        this.date = new Date();
+    }
 };

@@ -9,6 +9,7 @@ import { areaLogger } from "../utils/logger";
 const logger = areaLogger("init-trpc");
 
 export const initTrpcServer = () => {
+    logger.info("Starting TRPC server...");
     const trpcServer = createHTTPServer({
         router: appRouter,
         basePath: "/users-trpc/",
