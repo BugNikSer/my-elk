@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import {
 	Alert,
 	CircularProgress,
@@ -16,7 +16,7 @@ import {
 import { Refresh } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 
-import { expensesTRPC } from "../../utils/trpc";
+import { expensesTRPC, expensesTrpcClient } from "../../utils/trpc";
 import { usePagination } from "../../utils/hooks";
 import PageHeader from "../../components/PageHeader";
 import TablePagination from "../../components/TablePagination";
@@ -26,6 +26,34 @@ import CategoriesTableRow from "./CategoriesRow";
 export default function Categories() {
 	const { page, pageSize, setPage, setPageSize } = usePagination();
 	const { data, error, isLoading, refetch } = useQuery(expensesTRPC.categories.getMany.queryOptions({ pagination: { page, pageSize } }));
+
+	useEffect(() => {
+		const onUpdateSubscription = expensesTrpcClient.categories.onUpdate.subscribe(undefined, {
+			onData(event) {
+				console.log("Received subscription data:", event);
+			},
+			onError(err) {
+				console.error('Subscription error:', err);
+			},
+		});
+		return () => {
+			onUpdateSubscription.unsubscribe();
+		};
+	}, []);
+
+	useEffect(() => {
+		const onCreateSubscription = expensesTrpcClient.categories.onCreate.subscribe(undefined, {
+			onData(event) {
+				console.log("Received subscription data:", event);
+			},
+			onError(err) {
+				console.error('Subscription error:', err);
+			},
+		});
+		return () => {
+			onCreateSubscription.unsubscribe();
+		};
+	}, []);
 
 	return (
 		<>

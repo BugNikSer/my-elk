@@ -15,11 +15,13 @@ export default function CreateCategory({ category }: { category?: Category }) {
         if (category) {
             await expensesTrpcClient.categories.update.mutate({ id: category.id, name })
                 .then(() => {
-                    setName("");
                     setOpen(false);
                 })
                 .catch(err => {
                     console.error("Failed to update category", err);
+                })
+                .finally(() => {
+                    setIsLoading(false);
                 });
         } else {
             await expensesTrpcClient.categories.create.mutate({ name })
@@ -29,10 +31,12 @@ export default function CreateCategory({ category }: { category?: Category }) {
                 })
                 .catch(err => {
                     console.error("Failed to create category", err);
+                })
+                .finally(() => {
+                    setIsLoading(false);
                 });
         }
 
-        setIsLoading(false);
     };
 
     return (

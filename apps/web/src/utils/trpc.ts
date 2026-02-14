@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import { createTRPCClient, httpLink, TRPCClientError } from '@trpc/client';
+import { createTRPCClient, httpLink, httpSubscriptionLink, splitLink, TRPCClientError } from '@trpc/client';
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
 import type { AppRouter as UsersAppRouter } from "@my-elk/users-service";
 import type { AppRouter as ExpensesAppRouter } from "@my-elk/expenses-service";
@@ -28,15 +28,38 @@ export const usersTrpc = createTRPCOptionsProxy<UsersAppRouter>({
 
 export const expensesTrpcClient = createTRPCClient<ExpensesAppRouter>({
     links: [
-        httpLink({
-            url: `${VITE_EXPENSES_SERVICE}/expenses-trpc`,
-            fetch(url, options) {
-                return fetch(url, {
-                    ...options,
-                    credentials: 'include',
-                });
+        splitLink({
+            condition: (op) => {
+                console.log("[TRPC Link] Operation:", op);
+                return op.type === 'subscription';
             },
+            true: httpSubscriptionLink({
+                url: `${VITE_EXPENSES_SERVICE}/expenses-trpc`,
+                eventSourceOptions() {
+                    return {
+                        withCredentials: true,
+                    };
+                }
+            }),
+            false: httpLink({
+                url: `${VITE_EXPENSES_SERVICE}/expenses-trpc`,
+                fetch(url, options) {
+                    return fetch(url, {
+                        ...options,
+                        credentials: 'include',
+                    });
+                },
+            }),
         })
+        // httpLink({
+        //     url: `${VITE_EXPENSES_SERVICE}/expenses-trpc`,
+        //     fetch(url, options) {
+        //         return fetch(url, {
+        //             ...options,
+        //             credentials: 'include',
+        //         });
+        //     },
+        // })
     ]
 });
 export const expensesTRPC = createTRPCOptionsProxy<ExpensesAppRouter>({

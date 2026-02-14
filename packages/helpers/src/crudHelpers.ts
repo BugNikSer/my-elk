@@ -56,7 +56,7 @@ export const updateEntity = async <EntityType, EntityConstructorParams>({
     Entity: new (params: EntityConstructorParams) => EntityType;
     body: EntityConstructorParams & { id: number };
 } & ServiceHelperAdditionalParams): AsyncResultError<EntityType, ServiceError> => {
-        logger.debug("[edit]", body);
+        logger.debug("[update]", body);
 
         const em = orm.em.fork();
         let entity: EntityType;
