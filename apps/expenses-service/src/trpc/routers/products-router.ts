@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { handleServiceError } from "@my-elk/helpers/dist/serviceHelpers";
+import { handleServiceError } from "@my-elk/helpers";
 
 import { authedProcedure } from "../trpc";
 import { areaLogger } from "../../utils/logger";
@@ -18,9 +18,9 @@ export default {
         .mutation(async ({ input, ctx }) => {
             logger.debug("[create]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            const result = await productsService.create({ ...input, userId: ctx.userId });
+            const response = await productsService.create({ ...input, userId: ctx.userId });
             return handleServiceError({
-                result,
+                response,
                 methodName: "products.create",
                 logger,
             });
@@ -29,9 +29,9 @@ export default {
         .query(async ({ ctx }) => {
             logger.debug("[getMany]", ctx.userId);
             if (!ctx.userId) throw notAuthedError;
-            const result = await productsService.getMany({ userId: ctx.userId });
+            const response = await productsService.getMany({ userId: ctx.userId });
             return handleServiceError({
-                result,
+                response,
                 methodName: "products.getMany",
                 logger,
             });
@@ -41,9 +41,9 @@ export default {
         .query(async ({ input, ctx }) => {
             logger.debug("[getOne]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            const result = await productsService.getOne({ ...input, userId: ctx.userId });
+            const response = await productsService.getOne({ ...input, userId: ctx.userId });
             return handleServiceError({
-                result,
+                response,
                 methodName: "products.getOne",
                 logger,
             });

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo, useState } from "react";
 import { useBoolean } from "usehooks-ts";
-import { Button, Snackbar, TextField } from "@mui/material";
+import { Button, Snackbar, Stack, TextField } from "@mui/material";
 import { Check } from "@mui/icons-material";
 
 import { userStore } from "./authStore";
@@ -15,17 +15,25 @@ function AuthFormLogin() {
 
     const isEmailValid = useMemo(() => /[a-zA-Z0-9]+\@[a-zA-Z0-9]+\.[a-zA-Z]+/.test(email), [email]);
     const isPasswordValid = useMemo(() => password.length > 2 ,[password]);
+    const isFormValid = useMemo(() => isEmailValid && isPasswordValid, [isEmailValid, isPasswordValid]);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
+        if (!isFormValid) return;
         loading.setTrue();
         await usersTrpcClient.auth.login.query({ email, password })
             .then((data) => userStore.setState(data))
             .catch((err) => setError(parseTRPCError(err)));
         loading.setFalse();
-    };
+    }, [email, password, isFormValid]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            handleSubmit();
+        }
+    }, [handleSubmit]);
 
     return (
-        <>
+        <Stack direction="column" gap="16px" margin="16px" marginTop="24px" onKeyDown={handleKeyDown}>
             <TextField
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -55,12 +63,12 @@ function AuthFormLogin() {
             <Button
                 onClick={handleSubmit}
                 loading={loading.value}
-                disabled={!(isEmailValid && isPasswordValid)}
+                disabled={!isFormValid}
                 variant="contained"
             >
                 Log in
             </Button>
-        </>
+        </Stack>
     )
 }
 

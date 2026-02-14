@@ -1,6 +1,6 @@
 import { useState, type Dispatch, type PropsWithChildren, type SetStateAction } from "react";
 import { Button, Card, CardActions, CardContent, CardHeader, IconButton, Modal } from "@mui/material";
-import { AddCircleOutlined, Close } from '@mui/icons-material';
+import { AddCircleOutlined, EditOutlined, Close } from '@mui/icons-material';
 
 const style = {
   position: 'absolute',
@@ -10,19 +10,21 @@ const style = {
   width: 400,
 };
 
-export default function CreateEntityModal({
+export default function EntityFormModal({
     open,
     setOpen,
     title,
     isLoading,
     onSubmit,
     children,
+    isEditMode,
 }: PropsWithChildren<{
     open: boolean;
     setOpen: Dispatch<SetStateAction<boolean>>;
     title: string;
     isLoading: boolean;
     onSubmit: () => Promise<void>;
+    isEditMode: boolean;
 }>) {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -30,7 +32,7 @@ export default function CreateEntityModal({
     return (
         <>
             <IconButton color="primary" size="medium" onClick={handleOpen}>
-                <AddCircleOutlined />
+                {isEditMode ? <EditOutlined /> : <AddCircleOutlined />}
             </IconButton>
 
             <Modal
@@ -57,7 +59,7 @@ export default function CreateEntityModal({
                             fullWidth
                             loading={isLoading}
                         >
-                            Create
+                            {isEditMode ? "Update" : "Create"}
                         </Button>
                     </CardActions>
                 </Card>

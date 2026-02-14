@@ -27,9 +27,7 @@ function AuthForm() {
                 ))}
             </Tabs>
 
-            <Stack direction="column" gap="16px" margin="16px" marginTop="24px">
-                {modesDict[mode].fields}
-            </Stack>
+            {modesDict[mode].fields}
         </Paper>
     )
 }

@@ -1,5 +1,5 @@
 import { orm } from "../mikroORM";
-import { createEntity } from "@my-elk/helpers";
+import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { Category } from "../mikroORM/entities";
@@ -8,7 +8,13 @@ import { areaLogger } from "../utils/logger";
 const logger = areaLogger("categories-service");
 
 export default {
-    create: async (body: { name: string; userId: number }): AsyncResultError<Category, ServiceError> => createEntity({
+    create: async (body: Omit<Category, "id">): AsyncResultError<Category, ServiceError> => createEntity({
+        Entity: Category,
+        body,
+        orm,
+        logger,
+    }),
+    update: async (body: Category): AsyncResultError<Category, ServiceError> => updateEntity({
         Entity: Category,
         body,
         orm,
@@ -37,20 +43,20 @@ export default {
             ];
         }
     },
-    getMany: async (where: { userId: number }): AsyncResultError<Category[], ServiceError> => {
-        logger.debug("[getMany]", where);
-        try {
-            const categories = await orm.em.fork().find(Category, where);
-            return [categories, null];
-        } catch (e) {
-            logger.warn("[getMany]", e);
-            return [
-                null,
-                {
-                    code: "INTERNAL_SERVER_ERROR",
-                    error: e as Error,
-                },
-            ];
-        }
+    getMany: async ({
+        userId,
+        filter,
+        pagination,
+        sorting,
+    }: GetManyServiceParams<Category>): AsyncResultError<{ data: Category[], total: number }, ServiceError> => {
+        const where = { userId, ...filter };
+        return getManyEntities({
+            Entity: Category,
+            where,
+            pagination,
+            sorting,
+            orm,
+            logger,
+        })
     },
 };

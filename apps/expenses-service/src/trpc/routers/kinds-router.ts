@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { handleServiceError } from "@my-elk/helpers/dist/serviceHelpers";
+import { handleServiceError } from "@my-elk/helpers";
 
 import { authedProcedure } from "../trpc";
 import { areaLogger } from "../../utils/logger";
@@ -14,9 +14,9 @@ export default {
         .mutation(async ({ input, ctx }) => {
             logger.debug("[create]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            const result = await kindsService.create({ name: input.name, userId: ctx.userId });
+            const response = await kindsService.create({ name: input.name, userId: ctx.userId });
             return handleServiceError({
-                result,
+                response,
                 methodName: "kinds.create",
                 logger,
             });
@@ -25,9 +25,9 @@ export default {
         .query(async ({ ctx }) => {
             logger.debug("[getMany]", ctx.userId);
             if (!ctx.userId) throw notAuthedError;
-            const result = await kindsService.getMany({ userId: ctx.userId });
+            const response = await kindsService.getMany({ userId: ctx.userId });
             return handleServiceError({
-                result,
+                response,
                 methodName: "kinds.getMany",
                 logger,
             });
@@ -37,9 +37,9 @@ export default {
         .query(async ({ input, ctx }) => {
             logger.debug("[getOne]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            const result = await kindsService.getOne({ id: input.id, userId: ctx.userId });
+            const response = await kindsService.getOne({ id: input.id, userId: ctx.userId });
             return handleServiceError({
-                result,
+                response,
                 methodName: "kinds.getOne",
                 logger,
             });

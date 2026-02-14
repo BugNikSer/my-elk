@@ -1,5 +1,5 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+// import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Stack } from '@mui/material';
 import AuthWrapper from '../features/Auth/AuthWrapper';
 import { Sidebar } from '../features';
@@ -29,7 +29,7 @@ function RootLayout() {
                     </AuthWrapper>
                 </Stack>
             </Stack>
-            <TanStackRouterDevtools position='bottom-left' />
+            {/* <TanStackRouterDevtools position='bottom-left' /> */}
         </>
     )
 };

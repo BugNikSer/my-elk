@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button, IconButton, Snackbar, Stack, TextField } from "@mui/material";
 import { Check, VisibilityOutlined, VisibilityOffOutlined } from "@mui/icons-material";
 
@@ -19,18 +19,26 @@ function AuthFormSignup() {
 
     const isEmailValid = useMemo(() => /[a-zA-Z0-9]+\@[a-zA-Z0-9]+\.[a-zA-Z]+/.test(email), [email]);
     const isPasswordValid = useMemo(() => password.length > 2 ,[password]);
-    const isPasswordConfirmValid = useMemo(() => isPasswordValid && passwordConfirm === password,[passwordConfirm, password, isPasswordValid])
+    const isPasswordConfirmValid = useMemo(() => isPasswordValid && passwordConfirm === password,[passwordConfirm, password, isPasswordValid]);
+    const isFormValid = useMemo(() => isEmailValid && isPasswordValid && isPasswordConfirmValid, [isEmailValid, isPasswordValid, isPasswordConfirmValid]);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
+        if (!isFormValid) return;
         loading.setTrue();
         await usersTrpcClient.auth.signup.mutate({ email, password })
             .then((data) => userStore.setState(data))
             .catch(err => setError(parseTRPCError(err)));
         loading.setFalse();
-    }
+    }, [email, password, isFormValid]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+            handleSubmit();
+        }
+    }, [handleSubmit]);
 
     return (
-        <>
+        <Stack direction="column" gap="16px" margin="16px" marginTop="24px" onKeyDown={handleKeyDown}>
             <TextField
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -88,7 +96,7 @@ function AuthFormSignup() {
             <Button
                 onClick={handleSubmit}
                 loading={loading.value}
-                disabled={!(isEmailValid && isPasswordValid)}
+                disabled={!isFormValid}
                 variant="contained"
             >
                 Sign up
@@ -99,7 +107,7 @@ function AuthFormSignup() {
                 onClose={() => setError(null)}
                 message={error}
             />
-        </>
+        </Stack>
     )
 }
 

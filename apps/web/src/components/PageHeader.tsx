@@ -13,7 +13,7 @@ export default function PageHeader ({
             direction="row"
             justifyContent="space-between"
             alignItems="center"
-            sx={{ p: 1, pb: 0 }}
+            sx={{ p: 1 }}
         >
             <Typography variant="h5">{title}</Typography>
             <Stack
