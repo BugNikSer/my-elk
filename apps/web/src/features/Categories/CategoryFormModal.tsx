@@ -5,15 +5,15 @@ import type { Category } from "@my-elk/expenses-service";
 import { expensesTrpcClient } from "../../utils/trpc";
 import EntityFormModal from "../../components/EntityFormModal";
 
-export default function CreateCategory({ category }: { category?: Category }) {
+export default function CreateCategory({ entity }: { entity?: Category }) {
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
-    const [name, setName] = useState(category?.name || "");
+    const [name, setName] = useState(entity?.name || "");
 
     const onSubmit = async () => {
         setIsLoading(true);
-        if (category) {
-            await expensesTrpcClient.categories.update.mutate({ id: category.id, name })
+        if (entity) {
+            await expensesTrpcClient.categories.update.mutate({ id: entity.id, name })
                 .then(() => {
                     setOpen(false);
                 })
@@ -43,9 +43,9 @@ export default function CreateCategory({ category }: { category?: Category }) {
         <EntityFormModal
             open={open}
             setOpen={setOpen}
-            title={Boolean(category) ? "Edit Category" : "Create Category"}
+            title={Boolean(entity) ? "Edit Category" : "Create Category"}
             isLoading={isLoading}
-            isEditMode={Boolean(category)}
+            isEditMode={Boolean(entity)}
             onSubmit={onSubmit}
         >
             <TextField value={name} onChange={e => setName(e.target.value)} label="Name" fullWidth />

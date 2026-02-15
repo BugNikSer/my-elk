@@ -6,8 +6,6 @@ import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-erro
 import { AreaLogger } from "@my-elk/logger";
 import { GetManyHelperParams, GetManyServiceParams, ServiceHelperAdditionalParams } from "./crudTypes";
 
-
-
 export const createEntity = async <EntityType, EntityConstructorParams>({
     Entity,
     body,
@@ -100,7 +98,7 @@ export const preloadLinkedEntities = async <
     Body extends Record<string, any>,
     Service extends {
         getOne: (params: { id: number; userId: number }) => AsyncResultError<any, ServiceError>;
-        getMany: (params: GetManyServiceParams<any>) => AsyncResultError<{data: any[], total: number}, ServiceError>;
+        getMany: (params: GetManyServiceParams<any, {}>) => AsyncResultError<{data: any[], total: number}, ServiceError>;
     },
 >({
     body,
@@ -146,27 +144,25 @@ export const preloadLinkedEntities = async <
     return null;
 };
 
-export const getManyEntities = async <EntityType>({
+export const getManyEntities = async <
+    EntityType extends { id: number },
+    FilterType extends Record<string, any>,
+>({
     Entity,
     where,
     pagination,
-    sorting,
+    sorting = { field: "id", order: "DESC" },
     orm,
     logger,
-}: GetManyHelperParams<EntityType> & ServiceHelperAdditionalParams): AsyncResultError<{ data: EntityType[], total: number }, ServiceError> => {
+}: GetManyHelperParams<EntityType, FilterType> & ServiceHelperAdditionalParams): AsyncResultError<{ data: EntityType[], total: number }, ServiceError> => {
     logger.debug("[getMany]", { where, pagination, sorting });
 
-    const orderBy = sorting ? {
-        [sorting.field]: sorting.order,
-    } : {
-        id: "ASC",
-    };
     const limitOffset = pagination ? {
         limit: pagination.pageSize,
         offset: (pagination.page - 1) * pagination.pageSize,
     } : {};
     const options: FindOptions<EntityType> = {
-        orderBy: orderBy as OrderDefinition<EntityType>,
+        orderBy: { [sorting.field]: sorting.order } as OrderDefinition<EntityType>,
         ...(limitOffset)
     };
 

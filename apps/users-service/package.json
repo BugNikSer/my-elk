@@ -27,7 +27,7 @@
     "@my-elk/helpers": "workspace:*",
     "@my-elk/logger": "workspace:*",
     "@my-elk/result-error": "workspace:*",
-    "@trpc/server": "^11.8.1",
+    "@trpc/server": "^11.10.0",
     "cors": "^2.8.5",
     "zod": "^4.3.2"
   },

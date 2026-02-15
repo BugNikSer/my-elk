@@ -8,15 +8,15 @@ export default function TablePagination({
     setPage,
     setPageSize,
     total,
-}: UsePaginationState & {  total: number | undefined }) {
+}: UsePaginationState & {  total: number | null }) {
     const count = useMemo(() => {
-        if (total === undefined) return 0;
+        if (total === null) return 0;
         return Math.ceil(total / pageSize);
     }, [total, pageSize]);
 
     return (
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ p: 1 }}>
-            <Typography>Total: {total === undefined ? "Unknown" : total}</Typography>
+            <Typography>Total: {total === null ? "Unknown" : total}</Typography>
             <Stack direction="row" spacing={2} alignItems="center">
                 <Typography>Rows per page:</Typography>
                 <Select

@@ -40,7 +40,7 @@ function Sidebar({ width }: { width: number }) {
         >
             <Stack direction="column" gap="4px">
                 {pages.map(({ path, Icon, label }) => (
-                    <Link to={path}>
+                    <Link to={path} key={path}>
                         <Tooltip placement="right" title={label}>
                             <IconButton size="medium" color={path === pathname ? "primary" : undefined}>
                                 <Icon />

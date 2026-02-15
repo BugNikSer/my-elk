@@ -24,9 +24,9 @@
     "@tanstack/react-router-devtools": "^1.144.0",
     "@tanstack/react-store": "^0.8.0",
     "@tanstack/store": "^0.8.0",
-    "@trpc/client": "^11.8.1",
-    "@trpc/server": "^11.8.1",
-    "@trpc/tanstack-react-query": "^11.8.1",
+    "@trpc/client": "^11.10.0",
+    "@trpc/server": "^11.10.0",
+    "@trpc/tanstack-react-query": "^11.10.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "usehooks-ts": "^3.1.1"

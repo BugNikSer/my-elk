@@ -29,10 +29,7 @@ export const usersTrpc = createTRPCOptionsProxy<UsersAppRouter>({
 export const expensesTrpcClient = createTRPCClient<ExpensesAppRouter>({
     links: [
         splitLink({
-            condition: (op) => {
-                console.log("[TRPC Link] Operation:", op);
-                return op.type === 'subscription';
-            },
+            condition: (op) => op.type === 'subscription',
             true: httpSubscriptionLink({
                 url: `${VITE_EXPENSES_SERVICE}/expenses-trpc`,
                 eventSourceOptions() {

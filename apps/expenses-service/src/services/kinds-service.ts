@@ -44,7 +44,7 @@ export default {
 		filter,
 		pagination,
 		sorting,
-	}: GetManyServiceParams<Kind>): AsyncResultError<{ data: Kind[], total: number }, ServiceError> => {
+	}: GetManyServiceParams<Kind, { query?: string }>): AsyncResultError<{ data: Kind[], total: number }, ServiceError> => {
 		const where: FilterQuery<Kind> = { userId, ...filter };
 		return getManyEntities({
 			Entity: Kind,

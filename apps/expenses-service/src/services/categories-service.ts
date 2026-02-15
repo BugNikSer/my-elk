@@ -4,6 +4,7 @@ import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { Category } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
+import { FilterQuery } from "@mikro-orm/core";
 
 const logger = areaLogger("categories-service");
 
@@ -48,8 +49,13 @@ export default {
         filter,
         pagination,
         sorting,
-    }: GetManyServiceParams<Category>): AsyncResultError<{ data: Category[], total: number }, ServiceError> => {
-        const where = { userId, ...filter };
+    }: GetManyServiceParams<Category, { query?: string }>): AsyncResultError<{ data: Category[], total: number }, ServiceError> => {
+        const { query } = filter || {};
+        const where: FilterQuery<Category> = { userId };
+        if (query) {
+            where.name = { $ilike: `%${query}%` };
+        }
+
         return getManyEntities({
             Entity: Category,
             where,

@@ -3,17 +3,17 @@ import type { Category } from "@my-elk/expenses-service";
 import CategoryFormModal from "./CategoryFormModal";
 
 export default function CategoriesTableRow({
-    category,
+    entity,
 }: {
-    category: Category;
+    entity: Category;
 }) {
     return (
-        <TableRow key={category.id} sx={{ height: "fit-content" }}>
-            <TableCell>{category.id}</TableCell>
-            <TableCell>{category.name}</TableCell>
+        <TableRow key={entity.id} sx={{ height: "fit-content" }}>
+            <TableCell>{entity.id}</TableCell>
+            <TableCell>{entity.name}</TableCell>
             <TableCell align="right">
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <CategoryFormModal category={category} />
+                    <CategoryFormModal entity={entity} />
                 </Stack>
              </TableCell>
          </TableRow>

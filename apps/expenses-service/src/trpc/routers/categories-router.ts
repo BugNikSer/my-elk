@@ -2,6 +2,7 @@ import EventEmitter from "events";
 import { z } from "zod";
 import { handleServiceError } from "@my-elk/helpers";
 import { tracked } from "@trpc/server";
+// Needed to delegate generator function* () { yield* maybeYield(entity) }
 import "@trpc/server/unstable-core-do-not-import";
 
 import { authedProcedure, router } from "../trpc";
@@ -75,7 +76,7 @@ const categoriesRouter = router({
 		}),
 	getMany: authedProcedure
 		.input(z.object({
-			filter: z.object({}).optional(),
+			filter: z.object({ query: z.string().optional() }).optional(),
 			pagination: z.object({ page: z.number(), pageSize: z.number() }).optional(),
 			sorting: z.object({ field: z.enum(["id", "name"]), order: z.enum(["ASC", "DESC"]) }).optional(),
 		}))
