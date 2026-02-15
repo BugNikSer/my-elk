@@ -32,6 +32,7 @@ export const elkTheme = createTheme({
         MuiTextField: { defaultProps: { size: "small" } },
         MuiButton: { defaultProps: { size: "small" } },
         MuiIconButton: { defaultProps: { size: "small" } },
+        MuiTableCell: { defaultProps: { size: "small" } },
     },
     shape: {
         borderRadius: 12,

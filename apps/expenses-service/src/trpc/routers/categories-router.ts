@@ -33,8 +33,6 @@ const categoriesRouter = router({
 	onCreate: authedProcedure
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
-			
-			// TODO: handle connection lost
 
 			function* maybeYield(category: Category) {
 				if (category.userId !== ctx.userId) return;
@@ -62,8 +60,6 @@ const categoriesRouter = router({
 	onUpdate: authedProcedure
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("updated", { signal });
-			
-			// TODO: handle connection lost
 
 			function* maybeYield(category: Category) {
 				if (category.userId !== ctx.userId) return;

@@ -1,6 +1,5 @@
-import { type TRPC_ERROR_CODE_KEY } from "@trpc/server";
-import { createEntity, preloadLinkedEntities } from "@my-elk/helpers";
-import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
+import { createEntity, PreloadEntitiesCRUDService, preloadLinkedEntities } from "@my-elk/helpers";
+import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
 import { Purchase } from "../mikroORM/entities";
@@ -35,10 +34,10 @@ export default {
             body: processedBody,
             userId,
             config: [
-                { service: categoriesService, field: "category", id: categoryId } as const,
-                { service: kindsService, field: "kind", id: kindId } as const,
-                { service: tagsService, field: "tags", id: tagIds } as const,
-                { service: productsService, field: "product", id: productId } as const,
+                { service: categoriesService as PreloadEntitiesCRUDService, field: "category", id: categoryId } as const,
+                { service: kindsService as PreloadEntitiesCRUDService, field: "kind", id: kindId } as const,
+                { service: tagsService as PreloadEntitiesCRUDService, field: "tags", id: tagIds } as const,
+                { service: productsService as PreloadEntitiesCRUDService, field: "product", id: productId } as const,
             ]
         });
         if (preloadError) return [null, preloadError];

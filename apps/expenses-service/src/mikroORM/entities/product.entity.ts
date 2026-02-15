@@ -6,25 +6,25 @@ import { Kind } from "./kind.entity";
 @Entity()
 export class Product extends BaseTag {
 
-    @ManyToOne(() => Category, { nullable: true })
-    defaultCategory?: Category;
+	@ManyToOne(() => Category, { nullable: true })
+	defaultCategory?: Category;
 
-    @ManyToOne(() => Kind, { nullable: true })
-    defaultKind?: Kind;
+	@ManyToOne(() => Kind, { nullable: true })
+	defaultKind?: Kind;
 
-    constructor({
-        name,
-        userId,
-        defaultCategory,
-        defaultKind,
-    }: {
-        name: string;
-        userId: number;
-        defaultCategory?: Category;
-        defaultKind?: Kind;
-    }) {
-        super({ name, userId });
-        this.defaultCategory = defaultCategory;
-        this.defaultKind = defaultKind;
-    }
+	constructor({
+		name,
+		userId,
+		defaultCategory,
+		defaultKind,
+	}: {
+		name: string;
+		userId: number;
+		defaultCategory?: Category;
+		defaultKind?: Kind;
+	}) {
+		super({ name, userId });
+		this.defaultCategory = defaultCategory;
+		this.defaultKind = defaultKind;
+	}
 };

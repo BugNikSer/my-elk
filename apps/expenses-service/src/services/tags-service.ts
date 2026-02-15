@@ -1,9 +1,10 @@
 import { orm } from "../mikroORM";
-import { createEntity, getManyEntities } from "@my-elk/helpers";
+import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
-import { Tag } from "../mikroORM/entities";
+import { Purchase, Tag } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
+import { Collection } from "@mikro-orm/core";
 
 const logger = areaLogger("tags-service");
 
@@ -14,6 +15,15 @@ export default {
 		orm,
 		logger,
 	}),
+	update: async ({ purchaseIds, ...tagBody }: Omit<Tag, "purchases"> & { purchaseIds: number[] }): AsyncResultError<Tag, ServiceError> => {
+		const body: Tag = { ...tagBody, purchases: new Collection<Purchase>(purchaseIds) };
+		return updateEntity({
+			Entity: Tag,
+			body,
+			orm,
+			logger,
+		})
+	},
 	getOne: async (where: { id: number; userId: number }): AsyncResultError<Tag, ServiceError> => {
 		logger.debug("[getOne]", where);
 		try {
@@ -42,12 +52,7 @@ export default {
 		filter,
 		pagination,
 		sorting,
-	}: {
-		userId: number;
-		filter?: {};
-		pagination?: { page: number; pageSize: number };
-		sorting?: { field: keyof Tag; order: "ASC" | "DESC" };
-	}): AsyncResultError<{ data: Tag[], total: number }, ServiceError> => {
+	}: GetManyServiceParams<Tag, { query?: string }>): AsyncResultError<{ data: Tag[], total: number }, ServiceError> => {
 		const where = { userId, ...filter };
 		return getManyEntities({
 			Entity: Tag,

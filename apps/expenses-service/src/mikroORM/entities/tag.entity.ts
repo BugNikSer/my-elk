@@ -5,7 +5,7 @@ import { Purchase } from "./purchase.entity";
 @Entity()
 export class Tag extends BaseTag {
 
-    @ManyToMany(() => Purchase, purchase => purchase.tags)
-    expenses = new Collection<Purchase>(this);
-    
+	@ManyToMany(() => Purchase, purchase => purchase.tags)
+	purchases = new Collection<Purchase>(this);
+
 };

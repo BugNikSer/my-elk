@@ -18,4 +18,4 @@ export default function CategoriesTableRow({
              </TableCell>
          </TableRow>
     );
-}
+};

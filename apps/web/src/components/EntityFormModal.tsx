@@ -49,7 +49,7 @@ export default function EntityFormModal({
                         }
                         sx={{ pt: 1, pb: 0, pr: 2, pl: 2 }}
                     />
-                    <CardContent>
+                    <CardContent onKeyDown={(e) => e.key === "Enter" && onSubmit()}>
                         {children}
                     </CardContent>
                     <CardActions sx={{ pt: 0, pb: 2, pr: 2, pl: 2 }}>

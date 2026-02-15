@@ -1,6 +1,7 @@
 import type { PostgreSqlDriver, SqlEntityManager } from "@mikro-orm/postgresql";
 import type { Connection, EntityClass, EntityManager, FilterQuery, IDatabaseDriver, MikroORM } from "@mikro-orm/core";
 import { AreaLogger } from "@my-elk/logger";
+import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 export type GetManyServiceParams<
     EntityType,
@@ -24,4 +25,11 @@ export type ServiceHelperAdditionalParams = {
     orm: MikroORM<PostgreSqlDriver, SqlEntityManager<PostgreSqlDriver> & EntityManager<IDatabaseDriver<Connection>>>;
     logger: AreaLogger;
     skipFirstLogging?: boolean;
+};
+
+export type PreloadEntitiesCRUDService = {
+    getOne: (params: { id: number; userId: number }) => AsyncResultError<any, ServiceError>;
+    getMany: (params: GetManyServiceParams<any, {}>) => AsyncResultError<{data: any[], total: number}, ServiceError>;
+    create: (params: Record<string, any>) => Promise<any>;
+    update: (params: Record<string, any>) => Promise<any>;
 };

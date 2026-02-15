@@ -38,7 +38,7 @@ function Sidebar({ width }: { width: number }) {
             })}
             justifyContent="space-between"
         >
-            <Stack direction="column" gap="4px">
+            <Stack direction="column" gap={1}>
                 {pages.map(({ path, Icon, label }) => (
                     <Link to={path} key={path}>
                         <Tooltip placement="right" title={label}>
@@ -49,7 +49,7 @@ function Sidebar({ width }: { width: number }) {
                     </Link>
                 ))}
             </Stack>
-            <Stack direction="column" gap="4px">
+            <Stack direction="column">
                 <InfoBlock />
             </Stack>
             

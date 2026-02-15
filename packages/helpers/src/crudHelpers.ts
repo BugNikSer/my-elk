@@ -1,10 +1,9 @@
-import type { PostgreSqlDriver, SqlEntityManager } from "@mikro-orm/postgresql";
-import type { Connection, EntityClass, EntityManager, FilterQuery, FindOptions, IDatabaseDriver, MikroORM, OrderDefinition } from "@mikro-orm/core";
+import type { EntityClass, FindOptions, OrderDefinition } from "@mikro-orm/core";
 import { TRPCError } from "@trpc/server";
 
 import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
 import { AreaLogger } from "@my-elk/logger";
-import { GetManyHelperParams, GetManyServiceParams, ServiceHelperAdditionalParams } from "./crudTypes";
+import { PreloadEntitiesCRUDService, GetManyHelperParams, GetManyServiceParams, ServiceHelperAdditionalParams } from "./crudTypes";
 
 export const createEntity = async <EntityType, EntityConstructorParams>({
     Entity,
@@ -96,10 +95,7 @@ export const updateEntity = async <EntityType, EntityConstructorParams>({
 
 export const preloadLinkedEntities = async <
     Body extends Record<string, any>,
-    Service extends {
-        getOne: (params: { id: number; userId: number }) => AsyncResultError<any, ServiceError>;
-        getMany: (params: GetManyServiceParams<any, {}>) => AsyncResultError<{data: any[], total: number}, ServiceError>;
-    },
+    Service extends PreloadEntitiesCRUDService,
 >({
     body,
     userId,

@@ -1,5 +1,5 @@
 import { orm } from "../mikroORM";
-import { createEntity, getManyEntities, GetManyServiceParams } from "@my-elk/helpers";
+import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { Kind } from "../mikroORM/entities";
@@ -11,6 +11,12 @@ const logger = areaLogger("kinds-service");
 
 export default {
 	create: async (body: { name: string; userId: number }): AsyncResultError<Kind, ServiceError> => createEntity({
+		Entity: Kind,
+		body,
+		orm,
+		logger,
+	}),
+	update: async (body: Kind): AsyncResultError<Kind, ServiceError> => updateEntity({
 		Entity: Kind,
 		body,
 		orm,
@@ -45,7 +51,11 @@ export default {
 		pagination,
 		sorting,
 	}: GetManyServiceParams<Kind, { query?: string }>): AsyncResultError<{ data: Kind[], total: number }, ServiceError> => {
-		const where: FilterQuery<Kind> = { userId, ...filter };
+		const { query } = filter || {};
+		const where: FilterQuery<Kind> = { userId };
+		if (query) {
+			where.name = { $ilike: `%${query}%` };
+		}
 		return getManyEntities({
 			Entity: Kind,
 			where,

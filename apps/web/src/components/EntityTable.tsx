@@ -9,8 +9,10 @@ import {
 	TableContainer,
 	TableRow,
 	TableHead,
+	Stack,
 } from "@mui/material";
-import { Refresh } from "@mui/icons-material";
+import { Refresh, InboxOutlined } from "@mui/icons-material";
+
 
 import TablePagination from "./TablePagination";
 import type { UsePaginationState } from "../utils/hooks";
@@ -31,7 +33,7 @@ export default function EntityTable<EntityType extends { id: number }>({
 	setPageSize,
 }: {
 	columns: string[];
-	EntityRow: (props: {entity: EntityType}) => JSX.Element;
+	EntityRow: (props: { entity: EntityType }) => JSX.Element;
 	FormModal: (props: { entity?: EntityType }) => JSX.Element;
 	entities: EntityType[] | null;
 	total: number | null;
@@ -45,9 +47,17 @@ export default function EntityTable<EntityType extends { id: number }>({
 			<TableContainer sx={{ borderRadius: 0, flex: 1 }}>
 				<Table>
 					<TableHead>
-						<TableRow>
+						<TableRow
+							sx={(theme) => ({
+								fontWeight: "bold",
+								backgroundColor: theme.palette.background.paper,
+								['& th']: { fontWeight: "bold" },
+							})}
+						>
 							{columns.map((column) => (
-								<TableCell key={column}>{column}</TableCell>
+								<TableCell key={column}>
+									{column}
+								</TableCell>
 							))}
 							<TableCell align="right">
 								<FormModal />
@@ -72,6 +82,15 @@ export default function EntityTable<EntityType extends { id: number }>({
 										}>
 											Failed to load categories: {error.message}
 										</Alert>
+									</TableCell>
+								</TableRow>
+							) : entities?.length === 0 ? (
+								<TableRow>
+									<TableCell colSpan={3} align="center">
+										<Stack direction="column" alignItems="center" gap={1}>
+											<InboxOutlined color="primary" style={{ fontSize: "80px" }} />
+											No data
+										</Stack>
 									</TableCell>
 								</TableRow>
 							) : (
