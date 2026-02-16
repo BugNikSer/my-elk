@@ -8,4 +8,9 @@ export class Tag extends BaseTag {
 	@ManyToMany(() => Purchase, purchase => purchase.tags)
 	purchases = new Collection<Purchase>(this);
 
+	constructor({ name, userId }: { name: string; userId: number; }) {
+		super({ name, userId }); 
+		this.purchases = new Collection<Purchase>(this);
+	}
+
 };

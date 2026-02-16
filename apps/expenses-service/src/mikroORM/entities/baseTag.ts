@@ -23,4 +23,4 @@ export abstract class BaseTag {
 		this.userId = userId;
 	}
 
-}
+};

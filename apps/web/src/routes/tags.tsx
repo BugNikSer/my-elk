@@ -1,9 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import TagsTable from '../features/Tags';
 
 export const Route = createFileRoute('/tags')({
-  component: Tags,
+  component: TagsTable,
 });
-
-function Tags() {
-  return <span>Tags</span>;
-}

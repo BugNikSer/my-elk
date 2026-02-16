@@ -10,10 +10,11 @@ import { areaLogger } from "../../utils/logger";
 import categoriesService from "../../services/categories-service";
 import { notAuthedError } from "./constants";
 import { IterableEventEmitter, MyEvents } from '../../utils/emitter';
-import { Category } from '../..';
+// import { Category } from '../..';
+import { CategoryDTO } from "../../mikroORM/entityDTO";
 
 const logger = areaLogger("categories-router");
-const emitter = new IterableEventEmitter<MyEvents<Category>>();
+const emitter = new IterableEventEmitter<MyEvents<CategoryDTO>>();
 
 const categoriesRouter = router({
 	create: authedProcedure
@@ -34,7 +35,7 @@ const categoriesRouter = router({
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
 
-			function* maybeYield(category: Category) {
+			function* maybeYield(category: CategoryDTO) {
 				if (category.userId !== ctx.userId) return;
 				yield tracked(String(category.id), category);
 			}
@@ -61,7 +62,7 @@ const categoriesRouter = router({
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("updated", { signal });
 
-			function* maybeYield(category: Category) {
+			function* maybeYield(category: CategoryDTO) {
 				if (category.userId !== ctx.userId) return;
 				yield tracked(String(category.id), category);
 			}
@@ -72,7 +73,10 @@ const categoriesRouter = router({
 		}),
 	getMany: authedProcedure
 		.input(z.object({
-			filter: z.object({ query: z.string().optional() }).optional(),
+			filter: z.object({
+				query: z.string().optional(),
+				id: z.union([ z.number(), z.array(z.number()) ]).optional(),
+			}).optional(),
 			pagination: z.object({ page: z.number(), pageSize: z.number() }).optional(),
 			sorting: z.object({ field: z.enum(["id", "name"]), order: z.enum(["ASC", "DESC"]) }).optional(),
 		}))

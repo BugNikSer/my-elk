@@ -6,9 +6,9 @@ import { useTableState } from "../../utils/hooks";
 import PageHeader from "../../components/PageHeader";
 import EntityTable from "../../components/EntityTable";
 import CategoryFormModal from "./CategoryFormModal";
-import CategoriesTableRow from "./CategoriesTableRow";
+import CategoryTableRow from "./CategoryTableRow";
 
-export default function Categories() {
+export default function CategoriesTable() {
 	const {
         page, setPage, pageSize, setPageSize, filter, setFilter,
         entities, total, error, isLoading, refetch,
@@ -40,7 +40,7 @@ export default function Categories() {
 			/>
 			<EntityTable
 				columns={["Id", "Name"]}
-				EntityRow={CategoriesTableRow}
+				EntityRow={CategoryTableRow}
 				FormModal={CategoryFormModal}
 				refetch={refetch}
 				{...{ total, entities, error, isLoading, page, pageSize, setPage, setPageSize}}

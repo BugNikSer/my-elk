@@ -1,25 +1,23 @@
-import { createEntity, PreloadEntitiesCRUDService, preloadLinkedEntities } from "@my-elk/helpers";
+import { wrap } from "@mikro-orm/core";
+import { createEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
-import { Purchase } from "../mikroORM/entities";
+import { PurchaseDTO } from "../mikroORM/entityDTO";
+import { Category, Kind, Product, Purchase, Tag } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import categoriesService from "./categories-service";
-import kindsService from "./kinds-service";
-import tagsService from "./tags-service";
-import productsService from "./products-service";
 
 const logger = areaLogger("purchases-service");
 
 export default {
-    create: async(body: {
+    create: async(rawBody: {
         userId: number;
         productId: number;
         categoryId: number;
         kindId: number;
         tagIds: number[];
-    }): AsyncResultError<Purchase, ServiceError> => {
-        logger.debug("[create]", body);
+    }): AsyncResultError<PurchaseDTO, ServiceError> => {
+        logger.debug("[create]", rawBody);
 
         const {
             userId,
@@ -27,27 +25,23 @@ export default {
             categoryId,
             kindId,
             tagIds,
-        } = body;
-        const processedBody = { userId } as ConstructorParameters<typeof Purchase>[0];
+        } = rawBody;
 
-        const preloadError = await preloadLinkedEntities({
-            body: processedBody,
+        const body: ConstructorParameters<typeof Purchase>[0] = {
             userId,
-            config: [
-                { service: categoriesService as PreloadEntitiesCRUDService, field: "category", id: categoryId } as const,
-                { service: kindsService as PreloadEntitiesCRUDService, field: "kind", id: kindId } as const,
-                { service: tagsService as PreloadEntitiesCRUDService, field: "tags", id: tagIds } as const,
-                { service: productsService as PreloadEntitiesCRUDService, field: "product", id: productId } as const,
-            ]
-        });
-        if (preloadError) return [null, preloadError];
+            product: orm.em.getReference(Product, productId),
+            category: orm.em.getReference(Category, categoryId),
+            kind: orm.em.getReference(Kind, kindId),
+            tags: tagIds.map(id => orm.em.getReference(Tag, id)),
+        };
 
-        return createEntity({ Entity: Purchase, body: processedBody, logger, orm, skipFirstLogging: true });
+        return createEntity({ Entity: Purchase, body, logger, orm, skipFirstLogging: true });
     },
-    getOne: async (where: { id: number; userId: number }): AsyncResultError<Purchase, ServiceError> => {
+    getOne: async (where: { id: number; userId: number }): AsyncResultError<PurchaseDTO, ServiceError> => {
         logger.debug("[getMany]", where);
         try {
             const purchase = await orm.em.fork().findOne(Purchase, where);
+            
             if (!purchase) return [
                 null,
                 {
@@ -55,7 +49,7 @@ export default {
                     error: new Error("purchase not found"),
                 },
             ];
-            return [purchase, null];
+            return [wrap(purchase).toObject() as unknown as PurchaseDTO, null];
         } catch (e) {
             logger.warn("[getOne]", e);
             return [
@@ -67,11 +61,11 @@ export default {
             ];
         }
     },
-    getMany: async(where: { userId: number }): AsyncResultError<Purchase[], ServiceError> => {
+    getMany: async(where: { userId: number }): AsyncResultError<PurchaseDTO[], ServiceError> => {
         logger.debug("[getMany]", where);
         try {
             const purchase = await orm.em.fork().find(Purchase, where);
-            return [purchase, null];
+            return [purchase.map((p) => wrap(p).toObject() as unknown as PurchaseDTO), null];
         } catch (e) {
             logger.warn("[getMany]", e);
             return [

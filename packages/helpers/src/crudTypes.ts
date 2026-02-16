@@ -26,10 +26,3 @@ export type ServiceHelperAdditionalParams = {
     logger: AreaLogger;
     skipFirstLogging?: boolean;
 };
-
-export type PreloadEntitiesCRUDService = {
-    getOne: (params: { id: number; userId: number }) => AsyncResultError<any, ServiceError>;
-    getMany: (params: GetManyServiceParams<any, {}>) => AsyncResultError<{data: any[], total: number}, ServiceError>;
-    create: (params: Record<string, any>) => Promise<any>;
-    update: (params: Record<string, any>) => Promise<any>;
-};

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import Categories from '../features/Categories';
+import CategoriesTable from '../features/Categories';
 
 export const Route = createFileRoute('/categories')({
-  component: Categories,
+  component: CategoriesTable,
 });

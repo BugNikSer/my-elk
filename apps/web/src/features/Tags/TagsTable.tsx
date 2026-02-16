@@ -5,19 +5,19 @@ import { expensesTRPC, expensesTrpcClient } from "../../utils/trpc";
 import { useTableState } from "../../utils/hooks";
 import PageHeader from "../../components/PageHeader";
 import EntityTable from "../../components/EntityTable";
-import KindsTableRow from "./KindsTableRow";
-import KindFormModal from "./KindFormModal";
+import TagFormModal from "./TagFormModal";
+import TagTableRow from "./TagTableRow";
 
-export default function KindsTable() {
+export default function TagsTable() {
     const {
         page, setPage, pageSize, setPageSize, filter, setFilter,
         entities, total, error, isLoading, refetch,
     } = useTableState({
-        queryOptions: expensesTRPC.kinds.getMany.queryOptions,
-        onUpdateSubscriber: expensesTrpcClient.kinds.onUpdate.subscribe,
-        onCreateSubscriber: expensesTrpcClient.kinds.onCreate.subscribe,
+        queryOptions: expensesTRPC.tags.getMany.queryOptions,
+        onUpdateSubscriber: expensesTrpcClient.tags.onUpdate.subscribe,
+        onCreateSubscriber: expensesTrpcClient.tags.onCreate.subscribe,
         initialFilter: { query: "" },
-    });
+    })
 
     const handleQueryChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         setFilter((prev) => ({ ...prev, query: event.target.value }));
@@ -26,7 +26,7 @@ export default function KindsTable() {
     return (
         <>
             <PageHeader
-                title="Kinds"
+                title="Tags"
                 actions={(
                     <>
                         <TextField
@@ -40,8 +40,8 @@ export default function KindsTable() {
             />
             <EntityTable
                 columns={["Id", "Name"]}
-                EntityRow={KindsTableRow}
-                FormModal={KindFormModal}
+                EntityRow={TagTableRow}
+                FormModal={TagFormModal}
                 refetch={refetch}
                 {...{ total, entities, error, isLoading, page, pageSize, setPage, setPageSize}}
             />

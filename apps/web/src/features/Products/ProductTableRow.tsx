@@ -1,19 +1,21 @@
 import { Stack, TableCell, TableRow } from "@mui/material";
-import type { Category } from "@my-elk/expenses-service";
-import CategoryFormModal from "./CategoryFormModal";
+import type { ProductDTO } from "@my-elk/expenses-service";
+import ProductFormModal from "./ProductFormModal";
 
 export default function CategoriesTableRow({
     entity,
 }: {
-    entity: Category;
+    entity: ProductDTO;
 }) {
     return (
         <TableRow key={entity.id} sx={{ height: "fit-content" }}>
             <TableCell>{entity.id}</TableCell>
             <TableCell>{entity.name}</TableCell>
+            <TableCell>{entity.defaultCategory?.name || "-"}</TableCell>
+            <TableCell>{entity.defaultKind?.name || "-"}</TableCell>
             <TableCell align="right">
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <CategoryFormModal entity={entity} />
+                    <ProductFormModal entity={entity} />
                 </Stack>
              </TableCell>
          </TableRow>

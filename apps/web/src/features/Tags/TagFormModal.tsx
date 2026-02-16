@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { TextField } from "@mui/material";
-import type { CategoryDTO } from "@my-elk/expenses-service";
+import type { TagDTO } from "@my-elk/expenses-service";
 
 import { expensesTrpcClient } from "../../utils/trpc";
 import EntityFormModal from "../../components/EntityFormModal";
 
-export default function CategoryFormModal({ entity }: { entity?: CategoryDTO }) {
+export default function TagFormModal({ entity }: { entity?: TagDTO }) {
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(entity?.name || "");
-
+    
     useEffect(() => {
         if (!entity) return;
         setName(entity.name);
@@ -18,24 +18,24 @@ export default function CategoryFormModal({ entity }: { entity?: CategoryDTO }) 
     const onSubmit = async () => {
         setIsLoading(true);
         if (entity) {
-            await expensesTrpcClient.categories.update.mutate({ id: entity.id, name })
+            await expensesTrpcClient.tags.update.mutate({ id: entity.id, name, purchases: entity.purchases || [] })
                 .then(() => {
                     setOpen(false);
                 })
                 .catch(err => {
-                    console.error("Failed to update category", err);
+                    console.error("Failed to update tag", err);
                 })
                 .finally(() => {
                     setIsLoading(false);
                 });
         } else {
-            await expensesTrpcClient.categories.create.mutate({ name })
+            await expensesTrpcClient.tags.create.mutate({ name })
                 .then(() => {
                     setName("");
                     setOpen(false);
                 })
                 .catch(err => {
-                    console.error("Failed to create category", err);
+                    console.error("Failed to create tag", err);
                 })
                 .finally(() => {
                     setIsLoading(false);
@@ -48,7 +48,7 @@ export default function CategoryFormModal({ entity }: { entity?: CategoryDTO }) 
         <EntityFormModal
             open={open}
             setOpen={setOpen}
-            title={Boolean(entity) ? "Edit Category" : "Create Category"}
+            title={Boolean(entity) ? "Edit tag" : "Create tag"}
             isLoading={isLoading}
             isEditMode={Boolean(entity)}
             onSubmit={onSubmit}

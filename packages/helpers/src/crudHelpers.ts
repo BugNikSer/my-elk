@@ -1,11 +1,12 @@
-import type { EntityClass, FindOptions, OrderDefinition } from "@mikro-orm/core";
+import { wrap, type EntityClass, type EntityDTO, type FindOptions, type OrderDefinition } from "@mikro-orm/core";
 import { TRPCError } from "@trpc/server";
 
 import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
 import { AreaLogger } from "@my-elk/logger";
-import { PreloadEntitiesCRUDService, GetManyHelperParams, GetManyServiceParams, ServiceHelperAdditionalParams } from "./crudTypes";
+import { GetManyHelperParams, GetManyServiceParams, ServiceHelperAdditionalParams } from "./crudTypes";
+import { ReplaceEntitiesWithIds } from "./mikroORMTypes";
 
-export const createEntity = async <EntityType, EntityConstructorParams>({
+export const createEntity = async <EntityType extends object, EntityConstructorParams>({
     Entity,
     body,
     orm,
@@ -14,7 +15,7 @@ export const createEntity = async <EntityType, EntityConstructorParams>({
 }: {
     Entity: new (params: EntityConstructorParams) => EntityType;
     body: EntityConstructorParams;
-} & ServiceHelperAdditionalParams): AsyncResultError<EntityType, ServiceError> => {
+} & ServiceHelperAdditionalParams): AsyncResultError<ReplaceEntitiesWithIds<EntityDTO<EntityType>>, ServiceError> => {
         if (!skipFirstLogging) logger.debug("[create]", body);
 
         let entity: EntityType;
@@ -41,10 +42,10 @@ export const createEntity = async <EntityType, EntityConstructorParams>({
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR"}];
         }
 
-        return [entity, null];
+        return [wrap(entity).toObject() as ReplaceEntitiesWithIds<EntityDTO<EntityType>>, null];
 };
 
-export const updateEntity = async <EntityType, EntityConstructorParams>({
+export const updateEntity = async <EntityType extends object, EntityConstructorParams>({
     Entity,
     body,
     orm,
@@ -52,7 +53,7 @@ export const updateEntity = async <EntityType, EntityConstructorParams>({
 }: {
     Entity: new (params: EntityConstructorParams) => EntityType;
     body: EntityConstructorParams & { id: number };
-} & ServiceHelperAdditionalParams): AsyncResultError<EntityType, ServiceError> => {
+} & ServiceHelperAdditionalParams): AsyncResultError<ReplaceEntitiesWithIds<EntityDTO<EntityType>>, ServiceError> => {
         logger.debug("[update]", body);
 
         const em = orm.em.fork();
@@ -90,55 +91,8 @@ export const updateEntity = async <EntityType, EntityConstructorParams>({
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
 
-        return [entity, null];
+        return [wrap(entity).toObject() as ReplaceEntitiesWithIds<EntityDTO<EntityType>>, null];
     };
-
-export const preloadLinkedEntities = async <
-    Body extends Record<string, any>,
-    Service extends PreloadEntitiesCRUDService,
->({
-    body,
-    userId,
-    config,
-}: {
-    body: Body;
-    userId: number;
-    config: {
-        service: Service;
-        field: keyof Body;
-        id?: number | number[];
-    }[],
-}): Promise<ServiceError | null> => {
-    const errors = await Promise.all(config.map(async ({ service, field, id }) => {
-        if (id === undefined) return null;
-        if (Array.isArray(id)) {
-            const response = await service.getMany({ userId, filter: { id: { $in: id } } });
-            const [result, error] = response;
-            if (error) return error;
-            body[field] = result.data as Body[typeof field];
-        } else {
-            const [result, error] = await service.getOne({ id, userId });
-            if (error) return error;
-            body[field] = result;
-        }
-        return null;
-    }));
-
-    const filteredErrors = errors.filter(er => er !== null);
-
-    if (filteredErrors.length) {
-        let worstErrorCode: ServiceError["code"] = "NOT_FOUND";
-        if (filteredErrors.some((e) => e.code === "INTERNAL_SERVER_ERROR")) {
-            worstErrorCode = "INTERNAL_SERVER_ERROR";
-        }
-        return {
-            code: worstErrorCode,
-            error: new Error(filteredErrors.map(e => e.error.message).join(". ")),
-        };
-    }
-
-    return null;
-};
 
 export const getManyEntities = async <
     EntityType extends { id: number },
@@ -150,7 +104,7 @@ export const getManyEntities = async <
     sorting = { field: "id", order: "DESC" },
     orm,
     logger,
-}: GetManyHelperParams<EntityType, FilterType> & ServiceHelperAdditionalParams): AsyncResultError<{ data: EntityType[], total: number }, ServiceError> => {
+}: GetManyHelperParams<EntityType, FilterType> & ServiceHelperAdditionalParams): AsyncResultError<{ data: ReplaceEntitiesWithIds<EntityDTO<EntityType>>[], total: number }, ServiceError> => {
     logger.debug("[getMany]", { where, pagination, sorting });
 
     const limitOffset = pagination ? {
@@ -164,11 +118,17 @@ export const getManyEntities = async <
 
     try {
         const em = orm.em.fork();
-        const [total, data] = await Promise.all([
+        const [total, entities] = await Promise.all([
             em.count(Entity, where),
             em.find(Entity, where, options),
         ]);
-        return [{ data, total }, null];
+        return [
+            {
+                data: (entities as EntityType[]).map((e) => wrap(e).toObject()) as ReplaceEntitiesWithIds<EntityDTO<EntityType>>[],
+                total
+            },
+            null,
+        ];
     } catch (e) {
         logger.warn("[getMany]", e);
         return [

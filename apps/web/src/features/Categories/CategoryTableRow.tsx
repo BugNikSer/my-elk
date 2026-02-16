@@ -1,11 +1,11 @@
 import { Stack, TableCell, TableRow } from "@mui/material";
-import type { KindDTO } from "@my-elk/expenses-service";
-import KindFormModal from "./KindFormModal";
+import type { CategoryDTO } from "@my-elk/expenses-service";
+import CategoryFormModal from "./CategoryFormModal";
 
-export default function KindsTableRow({
+export default function CategoriesTableRow({
     entity,
 }: {
-    entity: KindDTO;
+    entity: CategoryDTO;
 }) {
     return (
         <TableRow key={entity.id} sx={{ height: "fit-content" }}>
@@ -13,7 +13,7 @@ export default function KindsTableRow({
             <TableCell>{entity.name}</TableCell>
             <TableCell align="right">
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <KindFormModal entity={entity} />
+                    <CategoryFormModal entity={entity} />
                 </Stack>
              </TableCell>
          </TableRow>

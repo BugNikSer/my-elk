@@ -3,25 +3,32 @@ import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } fro
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { Category } from "../mikroORM/entities";
+import { CategoryDTO } from "../mikroORM/entityDTO";
 import { areaLogger } from "../utils/logger";
 import { FilterQuery } from "@mikro-orm/core";
 
 const logger = areaLogger("categories-service");
 
 export default {
-	create: async (body: Omit<Category, "id">): AsyncResultError<Category, ServiceError> => createEntity({
-		Entity: Category,
-		body,
-		orm,
-		logger,
-	}),
-	update: async (body: Category): AsyncResultError<Category, ServiceError> => updateEntity({
-		Entity: Category,
-		body,
-		orm,
-		logger,
-	}),
-	getOne: async (where: { id: number; userId: number }): AsyncResultError<Category, ServiceError> => {
+	create: async (body: Omit<CategoryDTO, "id">): AsyncResultError<CategoryDTO, ServiceError> => {
+		const result = createEntity({
+			Entity: Category,
+			body,
+			orm,
+			logger,
+		});
+		return result as AsyncResultError<CategoryDTO, ServiceError>;
+	},
+	update: async (body: CategoryDTO): AsyncResultError<CategoryDTO, ServiceError> => {
+		const result = updateEntity({
+			Entity: Category,
+			body,
+			orm,
+			logger,
+		});
+		return result as AsyncResultError<CategoryDTO, ServiceError>;
+	},
+	getOne: async (where: { id: number; userId: number }): AsyncResultError<CategoryDTO, ServiceError> => {
 		logger.debug("[getOne]", where);
 		try {
 			const category = await orm.em.fork().findOne(Category, where);
@@ -49,20 +56,27 @@ export default {
 		filter,
 		pagination,
 		sorting,
-	}: GetManyServiceParams<Category, { query?: string }>): AsyncResultError<{ data: Category[], total: number }, ServiceError> => {
-		const { query } = filter || {};
+	}: GetManyServiceParams<CategoryDTO, {
+		query?: string,
+		id?: number | number[],
+	}>): AsyncResultError<{ data: CategoryDTO[], total: number }, ServiceError> => {
+		const { query, id } = filter || {};
 		const where: FilterQuery<Category> = { userId };
+
 		if (query) {
 			where.name = { $ilike: `%${query}%` };
 		}
+		if (id !== undefined) where.id = id;
 
-		return getManyEntities({
+		const result = getManyEntities({
 			Entity: Category,
 			where,
 			pagination,
 			sorting,
 			orm,
 			logger,
-		})
+		});
+
+		return result as AsyncResultError<{ data: CategoryDTO[], total: number }, ServiceError>;
 	},
 };

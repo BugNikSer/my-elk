@@ -1,4 +1,4 @@
-import { Entity } from "@mikro-orm/postgresql";
+import { Entity, EntityDTO } from "@mikro-orm/postgresql";
 import { BaseTag } from "./baseTag";
 
 @Entity()

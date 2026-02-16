@@ -6,10 +6,10 @@ import { Kind } from "./kind.entity";
 @Entity()
 export class Product extends BaseTag {
 
-	@ManyToOne(() => Category, { nullable: true })
+	@ManyToOne(() => Category, { ref: true, nullable: true })
 	defaultCategory?: Category;
 
-	@ManyToOne(() => Kind, { nullable: true })
+	@ManyToOne(() => Kind, { ref: true, nullable: true })
 	defaultKind?: Kind;
 
 	constructor({

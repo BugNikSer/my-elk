@@ -4,13 +4,13 @@ import { handleServiceError } from "@my-elk/helpers";
 import { areaLogger } from "../../utils/logger";
 import kindsService from "../../services/kinds-service";
 import { IterableEventEmitter, MyEvents } from "../../utils/emitter";
-import { Kind } from "../../mikroORM/entities";
+import { KindDTO } from "../../mikroORM/entityDTO";
 import { authedProcedure } from "../trpc";
 import { notAuthedError } from "./constants";
 import { tracked } from "@trpc/server";
 
 const logger = areaLogger("kinds-router");
-const emitter = new IterableEventEmitter<MyEvents<Kind>>();
+const emitter = new IterableEventEmitter<MyEvents<KindDTO>>();
 
 export default {
 	create: authedProcedure
@@ -31,7 +31,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
 
-			function* maybeYield(kind: Kind) {
+			function* maybeYield(kind: KindDTO) {
 				if (kind.userId !== ctx.userId) return;
 				yield tracked(String(kind.id), kind);
 			}
@@ -58,7 +58,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("updated", { signal });
 
-			function* maybeYield(kind: Kind) {
+			function* maybeYield(kind: KindDTO) {
 				if (kind.userId !== ctx.userId) return;
 				yield tracked(String(kind.id), kind);
 			}
@@ -69,7 +69,10 @@ export default {
 		}),
 	getMany: authedProcedure
 		.input(z.object({
-			filter: z.object({ query: z.string().optional() }).optional(),
+			filter: z.object({
+				query: z.string().optional(),
+				id: z.union([ z.number(), z.array(z.number()) ]).optional(),
+			}).optional(),
 			pagination: z.object({ page: z.number(), pageSize: z.number() }).optional(),
 			sorting: z.object({ field: z.enum(["id", "name"]), order: z.enum(["ASC", "DESC"]) }).optional(),
 		}))

@@ -5,17 +5,17 @@ import { expensesTRPC, expensesTrpcClient } from "../../utils/trpc";
 import { useTableState } from "../../utils/hooks";
 import PageHeader from "../../components/PageHeader";
 import EntityTable from "../../components/EntityTable";
-import KindsTableRow from "./KindsTableRow";
-import KindFormModal from "./KindFormModal";
+import ProductsTableRow from "./ProductTableRow";
+import ProductFormModal from "./ProductFormModal";
 
-export default function KindsTable() {
+export default function ProductsTable() {
     const {
         page, setPage, pageSize, setPageSize, filter, setFilter,
         entities, total, error, isLoading, refetch,
     } = useTableState({
-        queryOptions: expensesTRPC.kinds.getMany.queryOptions,
-        onUpdateSubscriber: expensesTrpcClient.kinds.onUpdate.subscribe,
-        onCreateSubscriber: expensesTrpcClient.kinds.onCreate.subscribe,
+        queryOptions: expensesTRPC.products.getMany.queryOptions,
+        onUpdateSubscriber: expensesTrpcClient.products.onUpdate.subscribe,
+        onCreateSubscriber: expensesTrpcClient.products.onCreate.subscribe,
         initialFilter: { query: "" },
     });
 
@@ -26,7 +26,7 @@ export default function KindsTable() {
     return (
         <>
             <PageHeader
-                title="Kinds"
+                title="Products"
                 actions={(
                     <>
                         <TextField
@@ -39,9 +39,9 @@ export default function KindsTable() {
                 )}
             />
             <EntityTable
-                columns={["Id", "Name"]}
-                EntityRow={KindsTableRow}
-                FormModal={KindFormModal}
+                columns={["Id", "Name", "Default Category", "Default Kind"]}
+                EntityRow={ProductsTableRow}
+                FormModal={ProductFormModal}
                 refetch={refetch}
                 {...{ total, entities, error, isLoading, page, pageSize, setPage, setPageSize}}
             />

@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TextField } from "@mui/material";
-import type { Kind } from "@my-elk/expenses-service";
+import type { KindDTO } from "@my-elk/expenses-service";
 
 import { expensesTrpcClient } from "../../utils/trpc";
 import EntityFormModal from "../../components/EntityFormModal";
 
-export default function CreateKind({ entity }: { entity?: Kind }) {
+export default function KindFormModal({ entity }: { entity?: KindDTO }) {
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(entity?.name || "");
+    
+    useEffect(() => {
+        if (!entity) return;
+        setName(entity.name);
+    }, [entity])
 
     const onSubmit = async () => {
         setIsLoading(true);

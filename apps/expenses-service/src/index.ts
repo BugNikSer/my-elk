@@ -6,4 +6,4 @@ initMikroORM();
 initTrpcServer();
 
 export type { AppRouter };
-export * from "./mikroORM/entities";
+export * from "./mikroORM/entityDTO";

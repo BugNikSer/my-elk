@@ -1,40 +1,70 @@
-import { type TRPC_ERROR_CODE_KEY } from "@trpc/server";
-import { createEntity, getManyEntities, PreloadEntitiesCRUDService, preloadLinkedEntities } from "@my-elk/helpers";
+import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
-import { Product } from "../mikroORM/entities";
+import { ProductDTO } from "../mikroORM/entityDTO";
+import { Category, Kind, Product } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import categoriesService from "./categories-service";
-import kindsService from "./kinds-service";
+import { EntityDTO, FilterQuery, wrap } from "@mikro-orm/core";
 
 const logger = areaLogger("products-service");
 
 export default {
-	create: async (body: {
+	create: async (rawBody: {
 		name: string;
 		userId: number;
-		defaultCategoryId?: number;
-		defaultKindId?: number;
-	}): AsyncResultError<Product, ServiceError> => {
-		logger.debug("[create]", body);
+		defaultCategory?: number;
+		defaultKind?: number;
+	}): AsyncResultError<ProductDTO, ServiceError> => {
+		logger.debug("[create]", rawBody);
 
-		const { name, userId, defaultCategoryId, defaultKindId } = body;
-		const processedBody: ConstructorParameters<typeof Product>[0] = { name, userId };
+		const {
+			defaultCategory: defaultCategoryId,
+			defaultKind: defaultKindId,
+			...restBody
+		} = rawBody;
 
-		const preloadError = await preloadLinkedEntities({
-			body: processedBody,
-			userId,
-			config: [
-				{ service: categoriesService as PreloadEntitiesCRUDService, field: "defaultCategory", id: defaultCategoryId } as const,
-				{ service: kindsService as PreloadEntitiesCRUDService, field: "defaultKind", id: defaultKindId } as const,
-			],
+		const body: Omit<Product, "id"> = {
+			...restBody,
+			defaultCategory: defaultCategoryId ? orm.em.getReference(Category, defaultCategoryId) : undefined,
+			defaultKind: defaultKindId ? orm.em.getReference(Kind, defaultKindId) : undefined
+		};
+
+		const result = createEntity({
+			Entity: Product,
+			body,
+			orm,
+			logger,
+			skipFirstLogging: true,
 		});
-		if (preloadError) return [null, preloadError];
 
-		return createEntity({ Entity: Product, body: processedBody, logger, orm, skipFirstLogging: true });
+		return result as AsyncResultError<ProductDTO, ServiceError>;
 	},
-	getOne: async (where: { id: number, userId: number; }): AsyncResultError<Product, ServiceError> => {
+	update: async ({
+		defaultCategory,
+		defaultKind,
+		...restBody
+	}: {
+		name: string;
+		userId: number;
+		defaultCategory?: number;
+		defaultKind?: number;
+		id: number;
+}
+): AsyncResultError<ProductDTO, ServiceError> => {
+		const body: ConstructorParameters<typeof Product>[0] & { id: number } = {
+			...restBody,
+			defaultCategory: defaultCategory ? orm.em.fork().getReference(Category, defaultCategory) : undefined,
+			defaultKind: defaultKind ? orm.em.fork().getReference(Kind, defaultKind) : undefined,
+		}
+		return updateEntity({
+			Entity: Product,
+			body,
+			orm,
+			logger,
+		})
+	},
+	getOne: async (where: { id: number, userId: number }): AsyncResultError<ProductDTO, ServiceError> => {
 		logger.debug("[getOne]", where);
 		try {
 			const product = await orm.em.fork().findOne(Product, where);
@@ -45,7 +75,8 @@ export default {
 					error: new Error("product not found"),
 				},
 			];
-			return [product, null];
+			const w = wrap(product).toObject();
+			return [wrap(product).toObject() as unknown as ProductDTO, null];
 		} catch (e) {
 			logger.warn("[getOne]", e);
 			return [
@@ -62,13 +93,15 @@ export default {
 		filter,
 		pagination,
 		sorting,
-	}: {
-		userId: number;
-		filter?: {};
-		pagination?: { page: number; pageSize: number };
-		sorting?: { field: keyof Product; order: "ASC" | "DESC" };
-	}): AsyncResultError<{ data: Product[], total: number }, ServiceError> => {
-		const where = { userId, ...filter };
+	}: GetManyServiceParams<ProductDTO, { query?: string; id?: number | number[] }>): AsyncResultError<{ data: ProductDTO[], total: number }, ServiceError> => {
+		const { query, id } = filter || {};
+		const where: FilterQuery<Product> = { userId };
+
+		if (query) {
+			where.name = { $ilike: `%${query}%` };
+		}
+		if (id !== undefined) where.id = id;
+		
 		return getManyEntities({
 			Entity: Product,
 			where,

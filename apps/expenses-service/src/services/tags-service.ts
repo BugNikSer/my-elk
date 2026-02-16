@@ -2,29 +2,39 @@ import { orm } from "../mikroORM";
 import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
-import { Purchase, Tag } from "../mikroORM/entities";
+import { TagDTO } from "../mikroORM/entityDTO";
+import { Tag } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import { Collection } from "@mikro-orm/core";
+import { FilterQuery, wrap } from "@mikro-orm/core";
 
 const logger = areaLogger("tags-service");
 
 export default {
-	create: async (body: { name: string; userId: number }): AsyncResultError<Tag, ServiceError> => createEntity({
-		Entity: Tag,
-		body,
-		orm,
-		logger,
-	}),
-	update: async ({ purchaseIds, ...tagBody }: Omit<Tag, "purchases"> & { purchaseIds: number[] }): AsyncResultError<Tag, ServiceError> => {
-		const body: Tag = { ...tagBody, purchases: new Collection<Purchase>(purchaseIds) };
-		return updateEntity({
+
+	create: async (body: { name: string; userId: number }): AsyncResultError<TagDTO, ServiceError> => {
+		const result = createEntity({
 			Entity: Tag,
 			body,
 			orm,
 			logger,
 		})
+		return result as AsyncResultError<TagDTO, ServiceError>;
 	},
-	getOne: async (where: { id: number; userId: number }): AsyncResultError<Tag, ServiceError> => {
+	update: async (body: {
+		purchases: number[] | null;
+		id: number;
+		name: string;
+		userId: number;
+	}): AsyncResultError<TagDTO, ServiceError> => {
+		const result = updateEntity({
+			Entity: Tag,
+			body,
+			orm,
+			logger,
+		})
+		return result as AsyncResultError<TagDTO, ServiceError>;
+	},
+	getOne: async (where: { id: number; userId: number }): AsyncResultError<TagDTO, ServiceError> => {
 		logger.debug("[getOne]", where);
 		try {
 			const tag = await orm.em.fork().findOne(Tag, where);
@@ -35,7 +45,7 @@ export default {
 					error: new Error("tag not found"),
 				},
 			];
-			return [tag, null];
+			return [wrap(tag).toObject() as unknown as TagDTO, null];
 		} catch (e) {
 			logger.warn("[getOne]", e);
 			return [
@@ -52,8 +62,15 @@ export default {
 		filter,
 		pagination,
 		sorting,
-	}: GetManyServiceParams<Tag, { query?: string }>): AsyncResultError<{ data: Tag[], total: number }, ServiceError> => {
-		const where = { userId, ...filter };
+	}: GetManyServiceParams<TagDTO, { query?: string; id?: number | number[] }>): AsyncResultError<{ data: TagDTO[], total: number }, ServiceError> => {
+		const { query, id } = filter || {};
+		const where: FilterQuery<Tag> = { userId };
+
+		if (query) {
+			where.name = { $ilike: `%${query}%` };
+		}
+		if (id !== undefined) where.id = id;
+		
 		return getManyEntities({
 			Entity: Tag,
 			where,

@@ -8,9 +8,10 @@ import { Tag } from "../../mikroORM/entities";
 import { authedProcedure } from "../trpc";
 import { notAuthedError } from "./constants";
 import { tracked } from "@trpc/server";
+import { TagDTO } from "../../mikroORM/entityDTO";
 
 const logger = areaLogger("tags-router");
-const emitter = new IterableEventEmitter<MyEvents<Tag>>();
+const emitter = new IterableEventEmitter<MyEvents<TagDTO>>();
 
 export default {
 	create: authedProcedure
@@ -19,17 +20,19 @@ export default {
 			logger.debug("[create]", ctx.userId, input);
 			if (!ctx.userId) throw notAuthedError;
 			const response = await tagsService.create({ name: input.name, userId: ctx.userId });
-			return handleServiceError({
+			const result = handleServiceError({
 				response,
 				methodName: "tags.create",
 				logger,
 			});
+			emitter.emit("created", result);
+			return result;
 		}),
 	onCreate: authedProcedure
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
 
-			function* maybeYield(kind: Tag) {
+			function* maybeYield(kind: TagDTO) {
 				if (kind.userId !== ctx.userId) return;
 				yield tracked(String(kind.id), kind);
 			}
@@ -39,38 +42,40 @@ export default {
 			}
 		}),
 	update: authedProcedure
-		.input(z.object({ id: z.number(), name: z.string(), purchaseIds: z.array(z.number()) }))
+		.input(z.object({ id: z.number(), name: z.string(), purchases: z.array(z.number()) }))
 		.mutation(async ({ input, ctx }) => {
 			logger.debug("[update]", ctx.userId, input);
 			if (!ctx.userId) throw notAuthedError;
 			const response = await tagsService.update({ ...input, userId: ctx.userId });
 			const result = handleServiceError({
 				response,
-				methodName: "categories.update",
+				methodName: "tags.update",
 				logger,
 			});
 			emitter.emit("updated", result);
 			return result;
 		}),
-		onUpdate: authedProcedure
-			.subscription(async function* ({ ctx, signal }) {
-				const iterable = emitter.toIterable("updated", { signal });
-	
-				function* maybeYield(category: Tag) {
-					if (category.userId !== ctx.userId) return;
-					yield tracked(String(category.id), category);
-				}
-	
-				for await (const [category] of iterable) {
-					yield* maybeYield(category);
-				}
-			}),
+	onUpdate: authedProcedure
+		.subscription(async function* ({ ctx, signal }) {
+			const iterable = emitter.toIterable("updated", { signal });
+
+			function* maybeYield(category: TagDTO) {
+				if (category.userId !== ctx.userId) return;
+				yield tracked(String(category.id), category);
+			}
+
+			for await (const [category] of iterable) {
+				yield* maybeYield(category);
+			}
+		}),
 	getMany: authedProcedure
 		.input(z.object({
-			id: z.union([
-				z.number(),
-				z.array(z.number()),
-			]).optional(),
+			filter: z.object({
+				query: z.string().optional(),
+				id: z.union([ z.number(), z.array(z.number()) ]).optional(),
+			}).optional(),
+			pagination: z.object({ page: z.number(), pageSize: z.number() }).optional(),
+			sorting: z.object({ field: z.enum(["id", "name"]), order: z.enum(["ASC", "DESC"]) }).optional(),
 		}))
 		.query(async ({ input, ctx }) => {
 			logger.debug("[getMany]", ctx.userId);
