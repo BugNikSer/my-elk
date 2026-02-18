@@ -10,11 +10,10 @@ import { areaLogger } from "../../utils/logger";
 import categoriesService from "../../services/categories-service";
 import { notAuthedError } from "./constants";
 import { IterableEventEmitter, MyEvents } from '../../utils/emitter';
-// import { Category } from '../..';
-import { CategoryDTO } from "../../mikroORM/entityDTO";
+import { Category } from "../../mikroORM/entities";
 
 const logger = areaLogger("categories-router");
-const emitter = new IterableEventEmitter<MyEvents<CategoryDTO>>();
+const emitter = new IterableEventEmitter<MyEvents<Category>>();
 
 const categoriesRouter = router({
 	create: authedProcedure
@@ -35,7 +34,7 @@ const categoriesRouter = router({
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
 
-			function* maybeYield(category: CategoryDTO) {
+			function* maybeYield(category: Category) {
 				if (category.userId !== ctx.userId) return;
 				yield tracked(String(category.id), category);
 			}
@@ -62,7 +61,7 @@ const categoriesRouter = router({
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("updated", { signal });
 
-			function* maybeYield(category: CategoryDTO) {
+			function* maybeYield(category: Category) {
 				if (category.userId !== ctx.userId) return;
 				yield tracked(String(category.id), category);
 			}

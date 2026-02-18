@@ -2,10 +2,9 @@ import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } fro
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
-import { ProductDTO } from "../mikroORM/entityDTO";
 import { Category, Kind, Product } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import { EntityDTO, FilterQuery, wrap } from "@mikro-orm/core";
+import { EntityDTO, FilterQuery, Populate, wrap } from "@mikro-orm/core";
 
 const logger = areaLogger("products-service");
 
@@ -15,7 +14,7 @@ export default {
 		userId: number;
 		defaultCategory?: number;
 		defaultKind?: number;
-	}): AsyncResultError<ProductDTO, ServiceError> => {
+	}): AsyncResultError<Product, ServiceError> => {
 		logger.debug("[create]", rawBody);
 
 		const {
@@ -30,15 +29,13 @@ export default {
 			defaultKind: defaultKindId ? orm.em.getReference(Kind, defaultKindId) : undefined
 		};
 
-		const result = createEntity({
+		return createEntity({
 			Entity: Product,
 			body,
 			orm,
 			logger,
 			skipFirstLogging: true,
 		});
-
-		return result as AsyncResultError<ProductDTO, ServiceError>;
 	},
 	update: async ({
 		defaultCategory,
@@ -51,7 +48,7 @@ export default {
 		defaultKind?: number;
 		id: number;
 }
-): AsyncResultError<ProductDTO, ServiceError> => {
+): AsyncResultError<Product, ServiceError> => {
 		const body: ConstructorParameters<typeof Product>[0] & { id: number } = {
 			...restBody,
 			defaultCategory: defaultCategory ? orm.em.fork().getReference(Category, defaultCategory) : undefined,
@@ -64,10 +61,10 @@ export default {
 			logger,
 		})
 	},
-	getOne: async (where: { id: number, userId: number }): AsyncResultError<ProductDTO, ServiceError> => {
+	getOne: async (where: { id: number, userId: number }): AsyncResultError<Product, ServiceError> => {
 		logger.debug("[getOne]", where);
 		try {
-			const product = await orm.em.fork().findOne(Product, where);
+			const product = await orm.em.fork().findOne(Product, where, { populate: ["defaultCategory", "defaultKind"] });
 			if (!product) return [
 				null,
 				{
@@ -75,8 +72,7 @@ export default {
 					error: new Error("product not found"),
 				},
 			];
-			const w = wrap(product).toObject();
-			return [wrap(product).toObject() as unknown as ProductDTO, null];
+			return [product, null];
 		} catch (e) {
 			logger.warn("[getOne]", e);
 			return [
@@ -93,7 +89,7 @@ export default {
 		filter,
 		pagination,
 		sorting,
-	}: GetManyServiceParams<ProductDTO, { query?: string; id?: number | number[] }>): AsyncResultError<{ data: ProductDTO[], total: number }, ServiceError> => {
+	}: GetManyServiceParams<Product, { query?: string; id?: number | number[] }>): AsyncResultError<{ data: Product[], total: number }, ServiceError> => {
 		const { query, id } = filter || {};
 		const where: FilterQuery<Product> = { userId };
 
@@ -109,6 +105,7 @@ export default {
 			sorting,
 			orm,
 			logger,
+			populate: ["defaultCategory", "defaultKind"] as unknown as Populate<Product>,
 		})
 	},
 };

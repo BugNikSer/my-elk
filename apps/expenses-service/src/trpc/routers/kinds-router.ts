@@ -4,13 +4,13 @@ import { handleServiceError } from "@my-elk/helpers";
 import { areaLogger } from "../../utils/logger";
 import kindsService from "../../services/kinds-service";
 import { IterableEventEmitter, MyEvents } from "../../utils/emitter";
-import { KindDTO } from "../../mikroORM/entityDTO";
+import { Kind } from "../../mikroORM/entities";
 import { authedProcedure } from "../trpc";
 import { notAuthedError } from "./constants";
 import { tracked } from "@trpc/server";
 
 const logger = areaLogger("kinds-router");
-const emitter = new IterableEventEmitter<MyEvents<KindDTO>>();
+const emitter = new IterableEventEmitter<MyEvents<Kind>>();
 
 export default {
 	create: authedProcedure
@@ -31,7 +31,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
 
-			function* maybeYield(kind: KindDTO) {
+			function* maybeYield(kind: Kind) {
 				if (kind.userId !== ctx.userId) return;
 				yield tracked(String(kind.id), kind);
 			}
@@ -58,7 +58,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("updated", { signal });
 
-			function* maybeYield(kind: KindDTO) {
+			function* maybeYield(kind: Kind) {
 				if (kind.userId !== ctx.userId) return;
 				yield tracked(String(kind.id), kind);
 			}

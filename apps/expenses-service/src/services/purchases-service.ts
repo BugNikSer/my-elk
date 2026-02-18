@@ -3,7 +3,6 @@ import { createEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
-import { PurchaseDTO } from "../mikroORM/entityDTO";
 import { Category, Kind, Product, Purchase, Tag } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
 
@@ -16,7 +15,7 @@ export default {
         categoryId: number;
         kindId: number;
         tagIds: number[];
-    }): AsyncResultError<PurchaseDTO, ServiceError> => {
+    }): AsyncResultError<Purchase, ServiceError> => {
         logger.debug("[create]", rawBody);
 
         const {
@@ -37,7 +36,7 @@ export default {
 
         return createEntity({ Entity: Purchase, body, logger, orm, skipFirstLogging: true });
     },
-    getOne: async (where: { id: number; userId: number }): AsyncResultError<PurchaseDTO, ServiceError> => {
+    getOne: async (where: { id: number; userId: number }): AsyncResultError<Purchase, ServiceError> => {
         logger.debug("[getMany]", where);
         try {
             const purchase = await orm.em.fork().findOne(Purchase, where);
@@ -49,7 +48,7 @@ export default {
                     error: new Error("purchase not found"),
                 },
             ];
-            return [wrap(purchase).toObject() as unknown as PurchaseDTO, null];
+            return [wrap(purchase).toObject() as unknown as Purchase, null];
         } catch (e) {
             logger.warn("[getOne]", e);
             return [
@@ -61,11 +60,11 @@ export default {
             ];
         }
     },
-    getMany: async(where: { userId: number }): AsyncResultError<PurchaseDTO[], ServiceError> => {
+    getMany: async(where: { userId: number }): AsyncResultError<Purchase[], ServiceError> => {
         logger.debug("[getMany]", where);
         try {
             const purchase = await orm.em.fork().find(Purchase, where);
-            return [purchase.map((p) => wrap(p).toObject() as unknown as PurchaseDTO), null];
+            return [purchase.map((p) => wrap(p).toObject() as unknown as Purchase), null];
         } catch (e) {
             logger.warn("[getMany]", e);
             return [

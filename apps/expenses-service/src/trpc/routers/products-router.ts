@@ -7,10 +7,10 @@ import { areaLogger } from "../../utils/logger";
 import productsService from "../../services/products-service";
 import { notAuthedError } from "./constants";
 import { IterableEventEmitter, MyEvents } from "../../utils/emitter";
-import { ProductDTO } from "../../mikroORM/entityDTO";
+import { Product } from "../../mikroORM/entities";
 
 const logger = areaLogger("products-router");
-const emitter = new IterableEventEmitter<MyEvents<ProductDTO>>();
+const emitter = new IterableEventEmitter<MyEvents<Product>>();
 
 export default {
     create: authedProcedure
@@ -35,7 +35,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
 
-			function* maybeYield(kind: ProductDTO) {
+			function* maybeYield(kind: Product) {
 				if (kind.userId !== ctx.userId) return;
 				yield tracked(String(kind.id), kind);
 			}
@@ -67,7 +67,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("updated", { signal });
 
-			function* maybeYield(category: ProductDTO) {
+			function* maybeYield(category: Product) {
 				if (category.userId !== ctx.userId) return;
 				yield tracked(String(category.id), category);
 			}

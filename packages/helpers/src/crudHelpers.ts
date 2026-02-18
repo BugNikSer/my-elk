@@ -1,12 +1,11 @@
-import { wrap, type EntityClass, type EntityDTO, type FindOptions, type OrderDefinition } from "@mikro-orm/core";
+import { Populate, wrap, type EntityClass, type EntityDTO, type FindOptions, type OrderDefinition } from "@mikro-orm/core";
 import { TRPCError } from "@trpc/server";
 
 import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
 import { AreaLogger } from "@my-elk/logger";
 import { GetManyHelperParams, GetManyServiceParams, ServiceHelperAdditionalParams } from "./crudTypes";
-import { ReplaceEntitiesWithIds } from "./mikroORMTypes";
 
-export const createEntity = async <EntityType extends object, EntityConstructorParams>({
+export const createEntity = async <Result, EntityType extends object, EntityConstructorParams>({
     Entity,
     body,
     orm,
@@ -15,7 +14,7 @@ export const createEntity = async <EntityType extends object, EntityConstructorP
 }: {
     Entity: new (params: EntityConstructorParams) => EntityType;
     body: EntityConstructorParams;
-} & ServiceHelperAdditionalParams): AsyncResultError<ReplaceEntitiesWithIds<EntityDTO<EntityType>>, ServiceError> => {
+} & ServiceHelperAdditionalParams): AsyncResultError<Result, ServiceError> => {
         if (!skipFirstLogging) logger.debug("[create]", body);
 
         let entity: EntityType;
@@ -42,10 +41,10 @@ export const createEntity = async <EntityType extends object, EntityConstructorP
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR"}];
         }
 
-        return [wrap(entity).toObject() as ReplaceEntitiesWithIds<EntityDTO<EntityType>>, null];
+        return [wrap(entity).toObject() as Result, null];
 };
 
-export const updateEntity = async <EntityType extends object, EntityConstructorParams>({
+export const updateEntity = async <Result, EntityType extends object, EntityConstructorParams>({
     Entity,
     body,
     orm,
@@ -53,7 +52,7 @@ export const updateEntity = async <EntityType extends object, EntityConstructorP
 }: {
     Entity: new (params: EntityConstructorParams) => EntityType;
     body: EntityConstructorParams & { id: number };
-} & ServiceHelperAdditionalParams): AsyncResultError<ReplaceEntitiesWithIds<EntityDTO<EntityType>>, ServiceError> => {
+} & ServiceHelperAdditionalParams): AsyncResultError<Result, ServiceError> => {
         logger.debug("[update]", body);
 
         const em = orm.em.fork();
@@ -91,10 +90,11 @@ export const updateEntity = async <EntityType extends object, EntityConstructorP
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
 
-        return [wrap(entity).toObject() as ReplaceEntitiesWithIds<EntityDTO<EntityType>>, null];
+        return [wrap(entity).toObject() as Result, null];
     };
 
 export const getManyEntities = async <
+    Result,
     EntityType extends { id: number },
     FilterType extends Record<string, any>,
 >({
@@ -104,7 +104,8 @@ export const getManyEntities = async <
     sorting = { field: "id", order: "DESC" },
     orm,
     logger,
-}: GetManyHelperParams<EntityType, FilterType> & ServiceHelperAdditionalParams): AsyncResultError<{ data: ReplaceEntitiesWithIds<EntityDTO<EntityType>>[], total: number }, ServiceError> => {
+    populate,
+}: GetManyHelperParams<EntityType, FilterType> & ServiceHelperAdditionalParams): AsyncResultError<{ data: Result[], total: number }, ServiceError> => {
     logger.debug("[getMany]", { where, pagination, sorting });
 
     const limitOffset = pagination ? {
@@ -113,7 +114,8 @@ export const getManyEntities = async <
     } : {};
     const options: FindOptions<EntityType> = {
         orderBy: { [sorting.field]: sorting.order } as OrderDefinition<EntityType>,
-        ...(limitOffset)
+        ...(limitOffset),
+        populate: populate as Populate<EntityType>
     };
 
     try {
@@ -124,7 +126,7 @@ export const getManyEntities = async <
         ]);
         return [
             {
-                data: (entities as EntityType[]).map((e) => wrap(e).toObject()) as ReplaceEntitiesWithIds<EntityDTO<EntityType>>[],
+                data: (entities as EntityType[]).map((e) => wrap(e).toObject()) as Result[],
                 total
             },
             null,

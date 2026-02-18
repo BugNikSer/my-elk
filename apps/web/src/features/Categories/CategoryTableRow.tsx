@@ -1,11 +1,11 @@
 import { Stack, TableCell, TableRow } from "@mui/material";
-import type { CategoryDTO } from "@my-elk/expenses-service";
+import type { Category } from "@my-elk/expenses-service";
 import CategoryFormModal from "./CategoryFormModal";
 
 export default function CategoriesTableRow({
     entity,
 }: {
-    entity: CategoryDTO;
+    entity: Category;
 }) {
     return (
         <TableRow key={entity.id} sx={{ height: "fit-content" }}>

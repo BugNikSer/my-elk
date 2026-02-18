@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { Select, TextField } from "@mui/material";
-import type { ProductDTO } from "@my-elk/expenses-service";
+import { MenuItem, Select, TextField, Typography } from "@mui/material";
+import type { Product } from "@my-elk/expenses-service";
 
-import { expensesTrpcClient } from "../../utils/trpc";
+import { expensesTRPC, expensesTrpcClient } from "../../utils/trpc";
 import EntityFormModal from "../../components/EntityFormModal";
+import { useQuery } from "@tanstack/react-query";
 
-export default function CategoryFormModal({ entity }: { entity?: ProductDTO }) {
+export default function CategoryFormModal({ entity }: { entity?: Product }) {
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(entity?.name || "");
     const [defaultCategory, setDefaultCategory] = useState(entity?.defaultCategory?.id || null);
     const [defaultKind, setDefaultKind] = useState(entity?.defaultKind?.id || null);
+
+    const categories = useQuery(expensesTRPC.categories.getMany.queryOptions({ pagination: { page: 1, pageSize: 20 } }));
 
     useEffect(() => {
         if (!entity) return;
@@ -63,9 +66,15 @@ export default function CategoryFormModal({ entity }: { entity?: ProductDTO }) {
             onSubmit={onSubmit}
         >
             <TextField value={name} onChange={e => setName(e.target.value)} label="Name" fullWidth />
-            <TextField value={defaultCategory} onChange={e => setDefaultCategory(Number(e.target.value))} label="Default Kind" fullWidth />
-            <TextField value={defaultKind} onChange={e => setDefaultKind(Number(e.target.value))} label="Default Kind" fullWidth />
-            {/* <Select value={defaultCategory} onChange={e => setDefaultCategory(e.target.value)} label="Default Category" fullWidth /> */}
+            <Select value={defaultCategory} size="small" label="Default Category" fullWidth>
+                {categories?.data?.data.map((category) => (
+                    <MenuItem
+                        key={category.id}
+                        value={category.id}
+                        onClick={() => setDefaultCategory(category.id)}
+                    >{category.name}</MenuItem>
+                ))}
+            </Select>
         </EntityFormModal>
     )
 }

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { TextField } from "@mui/material";
-import type { KindDTO } from "@my-elk/expenses-service";
+import type { Kind } from "@my-elk/expenses-service";
 
 import { expensesTrpcClient } from "../../utils/trpc";
 import EntityFormModal from "../../components/EntityFormModal";
 
-export default function KindFormModal({ entity }: { entity?: KindDTO }) {
+export default function KindFormModal({ entity }: { entity?: Kind }) {
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(entity?.name || "");

@@ -8,10 +8,9 @@ import { Tag } from "../../mikroORM/entities";
 import { authedProcedure } from "../trpc";
 import { notAuthedError } from "./constants";
 import { tracked } from "@trpc/server";
-import { TagDTO } from "../../mikroORM/entityDTO";
 
 const logger = areaLogger("tags-router");
-const emitter = new IterableEventEmitter<MyEvents<TagDTO>>();
+const emitter = new IterableEventEmitter<MyEvents<Tag>>();
 
 export default {
 	create: authedProcedure
@@ -32,7 +31,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("created", { signal });
 
-			function* maybeYield(kind: TagDTO) {
+			function* maybeYield(kind: Tag) {
 				if (kind.userId !== ctx.userId) return;
 				yield tracked(String(kind.id), kind);
 			}
@@ -59,7 +58,7 @@ export default {
 		.subscription(async function* ({ ctx, signal }) {
 			const iterable = emitter.toIterable("updated", { signal });
 
-			function* maybeYield(category: TagDTO) {
+			function* maybeYield(category: Tag) {
 				if (category.userId !== ctx.userId) return;
 				yield tracked(String(category.id), category);
 			}

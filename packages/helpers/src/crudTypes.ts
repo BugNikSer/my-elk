@@ -1,5 +1,5 @@
-import type { PostgreSqlDriver, SqlEntityManager } from "@mikro-orm/postgresql";
-import type { Connection, EntityClass, EntityManager, FilterQuery, IDatabaseDriver, MikroORM } from "@mikro-orm/core";
+import type { Populate, PostgreSqlDriver, SqlEntityManager } from "@mikro-orm/postgresql";
+import { Entity, type Connection, type EntityClass, type EntityManager, type FilterQuery, type IDatabaseDriver, type MikroORM } from "@mikro-orm/core";
 import { AreaLogger } from "@my-elk/logger";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
@@ -19,6 +19,7 @@ export type GetManyHelperParams<
 > = Omit<GetManyServiceParams<EntityType, FilterType>, "filter" | "userId"> & {
     Entity: new (params: any) => EntityType;
     where: FilterQuery<EntityType>;
+    populate?: Populate<EntityType, string>;
 } & ServiceHelperAdditionalParams;
 
 export type ServiceHelperAdditionalParams = {

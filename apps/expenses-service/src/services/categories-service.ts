@@ -3,32 +3,29 @@ import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } fro
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { Category } from "../mikroORM/entities";
-import { CategoryDTO } from "../mikroORM/entityDTO";
 import { areaLogger } from "../utils/logger";
-import { FilterQuery } from "@mikro-orm/core";
+import { FilterQuery, wrap } from "@mikro-orm/core";
 
 const logger = areaLogger("categories-service");
 
 export default {
-	create: async (body: Omit<CategoryDTO, "id">): AsyncResultError<CategoryDTO, ServiceError> => {
-		const result = createEntity({
+	create: async (body: Omit<Category, "id">): AsyncResultError<Category, ServiceError> => {
+		return createEntity({
 			Entity: Category,
 			body,
 			orm,
 			logger,
 		});
-		return result as AsyncResultError<CategoryDTO, ServiceError>;
 	},
-	update: async (body: CategoryDTO): AsyncResultError<CategoryDTO, ServiceError> => {
-		const result = updateEntity({
+	update: async (body: Category): AsyncResultError<Category, ServiceError> => {
+		return updateEntity({
 			Entity: Category,
 			body,
 			orm,
 			logger,
 		});
-		return result as AsyncResultError<CategoryDTO, ServiceError>;
 	},
-	getOne: async (where: { id: number; userId: number }): AsyncResultError<CategoryDTO, ServiceError> => {
+	getOne: async (where: { id: number; userId: number }): AsyncResultError<Category, ServiceError> => {
 		logger.debug("[getOne]", where);
 		try {
 			const category = await orm.em.fork().findOne(Category, where);
@@ -39,7 +36,7 @@ export default {
 					error: new Error("Category not found"),
 				},
 			];
-			return [category, null];
+			return [wrap(category).toObject(), null];
 		} catch (e) {
 			logger.warn("[getOne]", e);
 			return [
@@ -56,10 +53,10 @@ export default {
 		filter,
 		pagination,
 		sorting,
-	}: GetManyServiceParams<CategoryDTO, {
+	}: GetManyServiceParams<Category, {
 		query?: string,
 		id?: number | number[],
-	}>): AsyncResultError<{ data: CategoryDTO[], total: number }, ServiceError> => {
+	}>): AsyncResultError<{ data: Category[], total: number }, ServiceError> => {
 		const { query, id } = filter || {};
 		const where: FilterQuery<Category> = { userId };
 
@@ -68,7 +65,7 @@ export default {
 		}
 		if (id !== undefined) where.id = id;
 
-		const result = getManyEntities({
+		return getManyEntities({
 			Entity: Category,
 			where,
 			pagination,
@@ -76,7 +73,5 @@ export default {
 			orm,
 			logger,
 		});
-
-		return result as AsyncResultError<{ data: CategoryDTO[], total: number }, ServiceError>;
 	},
 };

@@ -1,11 +1,11 @@
 import { Stack, TableCell, TableRow } from "@mui/material";
-import type { KindDTO } from "@my-elk/expenses-service";
+import type { Kind } from "@my-elk/expenses-service";
 import KindFormModal from "./KindFormModal";
 
 export default function KindsTableRow({
     entity,
 }: {
-    entity: KindDTO;
+    entity: Kind;
 }) {
     return (
         <TableRow key={entity.id} sx={{ height: "fit-content" }}>

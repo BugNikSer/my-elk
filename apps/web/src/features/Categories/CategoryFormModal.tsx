@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { TextField } from "@mui/material";
-import type { CategoryDTO } from "@my-elk/expenses-service";
+import type { Category } from "@my-elk/expenses-service";
 
 import { expensesTrpcClient } from "../../utils/trpc";
 import EntityFormModal from "../../components/EntityFormModal";
 
-export default function CategoryFormModal({ entity }: { entity?: CategoryDTO }) {
+export default function CategoryFormModal({ entity }: { entity?: Category }) {
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [name, setName] = useState(entity?.name || "");
