@@ -3,11 +3,10 @@ import { handleServiceError } from "@my-elk/helpers";
 
 import { areaLogger } from "../../utils/logger";
 import kindsService from "../../services/kinds-service";
-import { IterableEventEmitter, MyEvents } from "../../utils/emitter";
+import { IterableEventEmitter, MyEvents, onEvent } from "../../utils/emitter";
 import { Kind } from "../../mikroORM/entities";
 import { authedProcedure } from "../trpc";
-import { notAuthedError } from "./constants";
-import { tracked } from "@trpc/server";
+import { defaultGetManyInput, notAuthedError } from "./constants";
 
 const logger = areaLogger("kinds-router");
 const emitter = new IterableEventEmitter<MyEvents<Kind>>();
@@ -28,17 +27,8 @@ export default {
 			return result;
 		}),
 	onCreate: authedProcedure
-		.subscription(async function* ({ ctx, signal }) {
-			const iterable = emitter.toIterable("created", { signal });
-
-			function* maybeYield(kind: Kind) {
-				if (kind.userId !== ctx.userId) return;
-				yield tracked(String(kind.id), kind);
-			}
-
-			for await (const [kind] of iterable) {
-				yield* maybeYield(kind);
-			}
+		.subscription(async function* (options) {
+			yield* onEvent({ options, emitter, event: "created" })
 		}),
 	update: authedProcedure
 		.input(z.object({ id: z.number(), name: z.string() }))
@@ -55,27 +45,11 @@ export default {
 			return result;
 		}),
 	onUpdate: authedProcedure
-		.subscription(async function* ({ ctx, signal }) {
-			const iterable = emitter.toIterable("updated", { signal });
-
-			function* maybeYield(kind: Kind) {
-				if (kind.userId !== ctx.userId) return;
-				yield tracked(String(kind.id), kind);
-			}
-
-			for await (const [kind] of iterable) {
-				yield* maybeYield(kind);
-			}
+		.subscription(async function* (options) {
+			yield* onEvent({ options, emitter, event: "updated" })
 		}),
 	getMany: authedProcedure
-		.input(z.object({
-			filter: z.object({
-				query: z.string().optional(),
-				id: z.union([ z.number(), z.array(z.number()) ]).optional(),
-			}).optional(),
-			pagination: z.object({ page: z.number(), pageSize: z.number() }).optional(),
-			sorting: z.object({ field: z.enum(["id", "name"]), order: z.enum(["ASC", "DESC"]) }).optional(),
-		}))
+		.input(defaultGetManyInput)
 		.query(async ({ ctx, input }) => {
 			logger.debug("[getMany]", ctx.userId, input);
 			if (!ctx.userId) throw notAuthedError;

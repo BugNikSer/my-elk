@@ -1,15 +1,11 @@
-import EventEmitter from "events";
 import { z } from "zod";
 import { handleServiceError } from "@my-elk/helpers";
-import { tracked } from "@trpc/server";
-// Needed to delegate generator function* () { yield* maybeYield(entity) }
-import "@trpc/server/unstable-core-do-not-import";
 
 import { authedProcedure, router } from "../trpc";
 import { areaLogger } from "../../utils/logger";
 import categoriesService from "../../services/categories-service";
-import { notAuthedError } from "./constants";
-import { IterableEventEmitter, MyEvents } from '../../utils/emitter';
+import { defaultGetManyInput, notAuthedError } from "./constants";
+import { IterableEventEmitter, MyEvents, onEvent } from '../../utils/emitter';
 import { Category } from "../../mikroORM/entities";
 
 const logger = areaLogger("categories-router");
@@ -31,17 +27,8 @@ const categoriesRouter = router({
 			return result;
 		}),
 	onCreate: authedProcedure
-		.subscription(async function* ({ ctx, signal }) {
-			const iterable = emitter.toIterable("created", { signal });
-
-			function* maybeYield(category: Category) {
-				if (category.userId !== ctx.userId) return;
-				yield tracked(String(category.id), category);
-			}
-
-			for await (const [category] of iterable) {
-				yield* maybeYield(category);
-			}
+		.subscription(async function* (options) {
+			yield* onEvent({ options, emitter, event: "created" })
 		}),
 	update: authedProcedure
 		.input(z.object({ id: z.number(), name: z.string() }))
@@ -58,27 +45,11 @@ const categoriesRouter = router({
 			return result;
 		}),
 	onUpdate: authedProcedure
-		.subscription(async function* ({ ctx, signal }) {
-			const iterable = emitter.toIterable("updated", { signal });
-
-			function* maybeYield(category: Category) {
-				if (category.userId !== ctx.userId) return;
-				yield tracked(String(category.id), category);
-			}
-
-			for await (const [category] of iterable) {
-				yield* maybeYield(category);
-			}
+		.subscription(async function* (options) {
+			yield* onEvent({ options, emitter, event: "updated" })
 		}),
 	getMany: authedProcedure
-		.input(z.object({
-			filter: z.object({
-				query: z.string().optional(),
-				id: z.union([ z.number(), z.array(z.number()) ]).optional(),
-			}).optional(),
-			pagination: z.object({ page: z.number(), pageSize: z.number() }).optional(),
-			sorting: z.object({ field: z.enum(["id", "name"]), order: z.enum(["ASC", "DESC"]) }).optional(),
-		}))
+		.input(defaultGetManyInput)
 		.query(async ({ input, ctx }) => {
 			logger.debug("[getMany]", ctx.userId, input);
 			if (!ctx.userId) throw notAuthedError;

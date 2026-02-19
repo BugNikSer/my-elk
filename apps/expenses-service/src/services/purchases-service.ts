@@ -1,5 +1,5 @@
 import { wrap } from "@mikro-orm/core";
-import { createEntity } from "@my-elk/helpers";
+import { createEntity, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
@@ -35,6 +35,42 @@ export default {
         };
 
         return createEntity({ Entity: Purchase, body, logger, orm, skipFirstLogging: true });
+    },
+    update: async (rawBody: {
+        id: number;
+        userId: number;
+        productId: number;
+        categoryId: number;
+        kindId: number;
+        tagIds: number[];
+    }): AsyncResultError<Purchase, ServiceError> => {
+        logger.debug("[create]", rawBody);
+
+        const {
+            id,
+            userId,
+            productId,
+            categoryId,
+            kindId,
+            tagIds,
+        } = rawBody;
+
+        const body: ConstructorParameters<typeof Purchase>[0] & { id: number } = {
+            id,
+            userId,
+            product: orm.em.getReference(Product, productId),
+            category: orm.em.getReference(Category, categoryId),
+            kind: orm.em.getReference(Kind, kindId),
+            tags: tagIds.map(id => orm.em.getReference(Tag, id)),
+        };
+
+        const result = updateEntity({
+            Entity: Purchase,
+            body,
+            orm,
+            logger,
+        })
+        return result as AsyncResultError<Purchase, ServiceError>;
     },
     getOne: async (where: { id: number; userId: number }): AsyncResultError<Purchase, ServiceError> => {
         logger.debug("[getMany]", where);
