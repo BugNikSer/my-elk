@@ -19,10 +19,10 @@ export default {
 		})
 	},
 	update: async (body: {
-		purchases: number[] | null;
 		id: number;
 		name: string;
 		userId: number;
+		purchases: number[] | null;
 	}): AsyncResultError<Tag, ServiceError> => {
 		const result = updateEntity({
 			Entity: Tag,
@@ -67,7 +67,9 @@ export default {
 		if (query) {
 			where.name = { $ilike: `%${query}%` };
 		}
-		if (id !== undefined) where.id = id;
+		if (id !== undefined) {
+            where.id = Array.isArray(id) ? { $in: id } : id;
+        }
 		
 		return getManyEntities({
 			Entity: Tag,

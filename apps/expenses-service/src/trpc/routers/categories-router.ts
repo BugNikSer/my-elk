@@ -11,7 +11,7 @@ import { Category } from "../../mikroORM/entities";
 const logger = areaLogger("categories-router");
 const emitter = new IterableEventEmitter<MyEvents<Category>>();
 
-const categoriesRouter = router({
+export default router({
 	create: authedProcedure
 		.input(z.object({ name: z.string() }))
 		.mutation(async ({ input, ctx }) => {
@@ -76,5 +76,3 @@ const categoriesRouter = router({
 			});
 		})
 });
-
-export default categoriesRouter;

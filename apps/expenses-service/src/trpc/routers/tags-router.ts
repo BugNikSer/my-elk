@@ -11,9 +11,12 @@ import { defaultGetManyInput, notAuthedError } from "./constants";
 const logger = areaLogger("tags-router");
 const emitter = new IterableEventEmitter<MyEvents<Tag>>();
 
+const tagCreateInput = z.object({ name: z.string() });
+const tagUpdateInput = tagCreateInput.extend({ id: z.number(), purchases: z.union([ z.array(z.number()), z.null() ]) });
+
 export default {
 	create: authedProcedure
-		.input(z.object({ name: z.string() }))
+		.input(tagCreateInput)
 		.mutation(async ({ input, ctx }) => {
 			logger.debug("[create]", ctx.userId, input);
 			if (!ctx.userId) throw notAuthedError;
@@ -31,7 +34,7 @@ export default {
 			yield* onEvent({ options, emitter, event: "created" })
 		}),
 	update: authedProcedure
-		.input(z.object({ id: z.number(), name: z.string(), purchases: z.array(z.number()) }))
+		.input(tagUpdateInput)
 		.mutation(async ({ input, ctx }) => {
 			logger.debug("[update]", ctx.userId, input);
 			if (!ctx.userId) throw notAuthedError;
@@ -51,7 +54,7 @@ export default {
 	getMany: authedProcedure
 		.input(defaultGetManyInput)
 		.query(async ({ input, ctx }) => {
-			logger.debug("[getMany]", ctx.userId);
+			logger.debug("[getMany]", ctx.userId, input);
 			if (!ctx.userId) throw notAuthedError;
 			const response = await tagsService.getMany({ ...input, userId: ctx.userId });
 			return handleServiceError({

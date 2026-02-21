@@ -4,7 +4,7 @@ import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 import { orm } from "../mikroORM";
 import { Category, Kind, Product } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import { EntityDTO, FilterQuery, Populate, wrap } from "@mikro-orm/core";
+import { FilterQuery, Populate, wrap } from "@mikro-orm/core";
 
 const logger = areaLogger("products-service");
 
@@ -72,7 +72,7 @@ export default {
 					error: new Error("product not found"),
 				},
 			];
-			return [product, null];
+			return [wrap(product).toObject() as unknown as Product, null];
 		} catch (e) {
 			logger.warn("[getOne]", e);
 			return [
@@ -96,7 +96,9 @@ export default {
 		if (query) {
 			where.name = { $ilike: `%${query}%` };
 		}
-		if (id !== undefined) where.id = id;
+		if (id !== undefined) {
+            where.id = Array.isArray(id) ? { $in: id } : id;
+        }
 		
 		return getManyEntities({
 			Entity: Product,

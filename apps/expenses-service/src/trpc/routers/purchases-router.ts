@@ -4,41 +4,49 @@ import { handleServiceError } from "@my-elk/helpers";
 import { authedProcedure } from "../trpc";
 import { areaLogger } from "../../utils/logger";
 import purchasesService from "../../services/purchases-service";
-import { defaultGetManyInput, notAuthedError } from "./constants";
+import { defaultGetManyFilter, defaultGetManyPagination, defaultGetManySorting, notAuthedError } from "./constants";
 import { IterableEventEmitter, MyEvents, onEvent } from "../../utils/emitter";
 import { Purchase } from "../../mikroORM/entities";
 
 const logger = areaLogger("purchases-router");
 const emitter = new IterableEventEmitter<MyEvents<Purchase>>();
 
-const purchaseUpdateInput = z.object({
-    userId: z.number(),
+const purchaseCreateInput= z.object({
     productId: z.number(),
     categoryId: z.number(),
     kindId: z.number(),
     tagIds: z.array(z.number()),
 });
-const purchaseCreateInput = purchaseUpdateInput.extend({ id: z.number() })
+const purchaseUpdateInput = purchaseCreateInput.extend({ id: z.number() });
+
+const purchasesGetManyInput = z.object({
+    filter: defaultGetManyFilter,
+    pagination: defaultGetManyPagination,
+    sorting: z.object({ field: z.enum(["id", "date"]), order: z.enum(["ASC", "DESC"]) }).optional(),
+});
 
 export default {
     create: authedProcedure
-        .input(purchaseUpdateInput)
+        .input(purchaseCreateInput)
         .mutation(async ({ input, ctx }) => {
             logger.debug("[create]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
             const response = await purchasesService.create({ ...input, userId: ctx.userId });
-            return handleServiceError({
+
+            const result = handleServiceError({
                 response,
                 methodName: "purchases.create",
                 logger,
             });
+            emitter.emit("created", result);
+            return result;
         }),
     onCreate: authedProcedure
         .subscription(async function* (options) {
             yield* onEvent({ options, emitter, event: "created" })
         }),
     update: authedProcedure
-        .input(purchaseCreateInput)
+        .input(purchaseUpdateInput)
         .mutation(async ({ input, ctx }) => {
             logger.debug("[update]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
@@ -56,11 +64,14 @@ export default {
             yield* onEvent({ options, emitter, event: "updated" })
         }),
     getMany: authedProcedure
-        .input(defaultGetManyInput)
-        .query(async ({ ctx }) => {
-            logger.debug("[getMany]", ctx.userId);
+        .input(purchasesGetManyInput)
+        .query(async ({ ctx, input }) => {
+            logger.debug("[getMany]", ctx.userId, input);
             if (!ctx.userId) throw notAuthedError;
-            const response = await purchasesService.getMany({ userId: ctx.userId });
+            const response = await purchasesService.getMany({
+                userId: ctx.userId,
+                ...input,
+            });
             return handleServiceError({
                 response,
                 methodName: "purchases.getMany",

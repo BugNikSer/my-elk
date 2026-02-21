@@ -63,7 +63,9 @@ export default {
 		if (query) {
 			where.name = { $ilike: `%${query}%` };
 		}
-		if (id !== undefined) where.id = id;
+		if (id !== undefined) {
+            where.id = Array.isArray(id) ? { $in: id } : id;
+        }
 
 		return getManyEntities({
 			Entity: Category,

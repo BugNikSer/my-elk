@@ -4,7 +4,6 @@ import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { Kind } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
-import { get } from "node:http";
 import { FilterQuery, wrap } from "@mikro-orm/core";
 
 const logger = areaLogger("kinds-service");
@@ -65,7 +64,9 @@ export default {
 		if (query) {
 			where.name = { $ilike: `%${query}%` };
 		}
-		if (id !== undefined) where.id = id;
+		if (id !== undefined) {
+            where.id = Array.isArray(id) ? { $in: id } : id;
+        }
 		
 		return getManyEntities({
 			Entity: Kind,

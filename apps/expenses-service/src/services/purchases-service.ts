@@ -1,5 +1,5 @@
-import { wrap } from "@mikro-orm/core";
-import { createEntity, updateEntity } from "@my-elk/helpers";
+import { FilterQuery, wrap } from "@mikro-orm/core";
+import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
@@ -44,7 +44,7 @@ export default {
         kindId: number;
         tagIds: number[];
     }): AsyncResultError<Purchase, ServiceError> => {
-        logger.debug("[create]", rawBody);
+        logger.debug("[update]", rawBody);
 
         const {
             id,
@@ -73,7 +73,7 @@ export default {
         return result as AsyncResultError<Purchase, ServiceError>;
     },
     getOne: async (where: { id: number; userId: number }): AsyncResultError<Purchase, ServiceError> => {
-        logger.debug("[getMany]", where);
+        logger.debug("[getOne]", where);
         try {
             const purchase = await orm.em.fork().findOne(Purchase, where);
             
@@ -96,20 +96,29 @@ export default {
             ];
         }
     },
-    getMany: async(where: { userId: number }): AsyncResultError<Purchase[], ServiceError> => {
-        logger.debug("[getMany]", where);
-        try {
-            const purchase = await orm.em.fork().find(Purchase, where);
-            return [purchase.map((p) => wrap(p).toObject() as unknown as Purchase), null];
-        } catch (e) {
-            logger.warn("[getMany]", e);
-            return [
-                null,
-                {
-                    code: "INTERNAL_SERVER_ERROR",
-                    error: e as Error,
-                },
-            ];
+    getMany: async ({
+        userId,
+        filter,
+        pagination,
+        sorting,
+    }: GetManyServiceParams<Purchase, { query?: string; id?: number | number[] }>): AsyncResultError<{ data: Purchase[]; total: number }, ServiceError> => {
+        const { query, id } = filter || {};
+        const where: FilterQuery<Purchase> = { userId };
+
+        if (query) {
+            where.product = { name: { $ilike: `%${query}%` } };
         }
+        if (id !== undefined) {
+            where.id = Array.isArray(id) ? { $in: id } : id;
+        }
+
+        return getManyEntities({
+            Entity: Purchase,
+            where,
+            pagination,
+            sorting,
+            orm,
+            logger,
+        });
     },
 };
