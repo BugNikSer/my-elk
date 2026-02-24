@@ -12,10 +12,12 @@ const logger = areaLogger("purchases-router");
 const emitter = new IterableEventEmitter<MyEvents<Purchase>>();
 
 const purchaseCreateInput= z.object({
+    price: z.number(),
     productId: z.number(),
     categoryId: z.number(),
     kindId: z.number(),
     tagIds: z.array(z.number()),
+    dateISO: z.string(),
 });
 const purchaseUpdateInput = purchaseCreateInput.extend({ id: z.number() });
 

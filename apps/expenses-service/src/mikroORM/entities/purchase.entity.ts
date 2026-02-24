@@ -14,6 +14,9 @@ export class Purchase {
 	@Property()
 	userId!: number;
 
+	@Property()
+	price!: number;
+
 	@ManyToOne(() => Product, { ref: true })
 	product!: Product;
 
@@ -31,22 +34,27 @@ export class Purchase {
 
 	constructor({
 		userId,
+		price,
 		product,
 		category,
 		kind,
 		tags,
+		date,
 	}: {
 		userId: number;
+		price: number;
 		product: Product;
 		category: Category;
 		kind: Kind;
 		tags: Tag[];
+		date: Date;
 	}) {
 		this.userId = userId;
+		this.price = price;
 		this.product = product;
 		this.category = category;
 		this.kind = kind;
 		tags.forEach(tag => this.tags.add(tag));
-		this.date = new Date();
+		this.date = date;
 	}
 };

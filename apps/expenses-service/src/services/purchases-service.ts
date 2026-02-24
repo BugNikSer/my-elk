@@ -11,6 +11,8 @@ const logger = areaLogger("purchases-service");
 export default {
     create: async(rawBody: {
         userId: number;
+        price: number;
+        dateISO: string;
         productId: number;
         categoryId: number;
         kindId: number;
@@ -19,15 +21,17 @@ export default {
         logger.debug("[create]", rawBody);
 
         const {
-            userId,
+            dateISO,
             productId,
             categoryId,
             kindId,
             tagIds,
+            ...restBody
         } = rawBody;
 
         const body: ConstructorParameters<typeof Purchase>[0] = {
-            userId,
+            ...restBody,
+            date: new Date(dateISO),
             product: orm.em.getReference(Product, productId),
             category: orm.em.getReference(Category, categoryId),
             kind: orm.em.getReference(Kind, kindId),
@@ -39,25 +43,27 @@ export default {
     update: async (rawBody: {
         id: number;
         userId: number;
+        price: number;
         productId: number;
         categoryId: number;
         kindId: number;
         tagIds: number[];
+        dateISO: string;
     }): AsyncResultError<Purchase, ServiceError> => {
         logger.debug("[update]", rawBody);
 
         const {
-            id,
-            userId,
+            dateISO,
             productId,
             categoryId,
             kindId,
             tagIds,
+            ...restBody
         } = rawBody;
 
         const body: ConstructorParameters<typeof Purchase>[0] & { id: number } = {
-            id,
-            userId,
+            ...restBody,
+            date: new Date(dateISO),
             product: orm.em.getReference(Product, productId),
             category: orm.em.getReference(Category, categoryId),
             kind: orm.em.getReference(Kind, kindId),
