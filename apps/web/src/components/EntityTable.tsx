@@ -68,13 +68,13 @@ export default function EntityTable<EntityType extends { id: number }>({
 						{
 							isLoading ? (
 								<TableRow>
-									<TableCell colSpan={3} align="center">
+									<TableCell colSpan={columns.length + 1} align="center">
 										<CircularProgress />
 									</TableCell>
 								</TableRow>
 							) : error ? (
 								<TableRow>
-									<TableCell colSpan={3} align="center">
+									<TableCell colSpan={columns.length + 1} align="center">
 										<Alert severity="error" action={
 											<IconButton color="inherit" onClick={() => refetch()}>
 												<Refresh />
@@ -86,7 +86,7 @@ export default function EntityTable<EntityType extends { id: number }>({
 								</TableRow>
 							) : entities?.length === 0 ? (
 								<TableRow>
-									<TableCell colSpan={3} align="center">
+									<TableCell colSpan={columns.length + 1} align="center">
 										<Stack direction="column" alignItems="center" gap={1}>
 											<InboxOutlined color="primary" style={{ fontSize: "80px" }} />
 											No data

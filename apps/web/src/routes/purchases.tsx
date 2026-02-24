@@ -1,9 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import PurchasesTable from '../features/Purchases';
 
 export const Route = createFileRoute('/purchases')({
-  component: Purchases,
+  component: PurchasesTable,
 });
-
-function Purchases() {
-  return <span>Purchases</span>;
-}

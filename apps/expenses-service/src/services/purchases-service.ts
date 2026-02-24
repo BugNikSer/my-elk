@@ -32,10 +32,10 @@ export default {
         const body: ConstructorParameters<typeof Purchase>[0] = {
             ...restBody,
             date: new Date(dateISO),
-            product: orm.em.getReference(Product, productId),
-            category: orm.em.getReference(Category, categoryId),
-            kind: orm.em.getReference(Kind, kindId),
-            tags: tagIds.map(id => orm.em.getReference(Tag, id)),
+            product: orm.em.fork().getReference(Product, productId),
+            category: orm.em.fork().getReference(Category, categoryId),
+            kind: orm.em.fork().getReference(Kind, kindId),
+            tags: tagIds.map(id => orm.em.fork().getReference(Tag, id)),
         };
 
         return createEntity({ Entity: Purchase, body, logger, orm, skipFirstLogging: true });
