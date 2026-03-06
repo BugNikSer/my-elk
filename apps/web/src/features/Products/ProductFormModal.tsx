@@ -14,6 +14,7 @@ export default function CategoryFormModal({ entity }: { entity?: Product }) {
     const [defaultKind, setDefaultKind] = useState(entity?.defaultKind?.id || null);
 
     const categories = useQuery(expensesTRPC.categories.getMany.queryOptions({ pagination: { page: 1, pageSize: 20 } }));
+    const kinds = useQuery(expensesTRPC.kinds.getMany.queryOptions({ pagination: { page: 1, pageSize: 20 } }));
 
     useEffect(() => {
         if (!entity) return;
@@ -28,8 +29,8 @@ export default function CategoryFormModal({ entity }: { entity?: Product }) {
             await expensesTrpcClient.products.update.mutate({
                 id: entity.id,
                 name,
-                defaultCategory: defaultCategory || undefined,
-                defaultKind: defaultKind || undefined,
+                defaultCategoryId: defaultCategory || undefined,
+                defaultKindId: defaultKind || undefined,
             })
                 .then(() => {
                     setOpen(false);
@@ -41,7 +42,11 @@ export default function CategoryFormModal({ entity }: { entity?: Product }) {
                     setIsLoading(false);
                 });
         } else {
-            await expensesTrpcClient.products.create.mutate({ name })
+            await expensesTrpcClient.products.create.mutate({
+                name,
+                defaultCategoryId: defaultCategory || undefined,
+                defaultKindId: defaultKind || undefined,
+            })
                 .then(() => {
                     setName("");
                     setOpen(false);
@@ -73,6 +78,15 @@ export default function CategoryFormModal({ entity }: { entity?: Product }) {
                         value={category.id}
                         onClick={() => setDefaultCategory(category.id)}
                     >{category.name}</MenuItem>
+                ))}
+            </Select>
+            <Select value={defaultKind} size="small" label="Default Kind" fullWidth>
+                {kinds?.data?.data.map((kind) => (
+                    <MenuItem
+                        key={kind.id}
+                        value={kind.id}
+                        onClick={() => setDefaultKind(kind.id)}
+                    >{kind.name}</MenuItem>
                 ))}
             </Select>
         </EntityFormModal>

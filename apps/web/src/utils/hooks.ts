@@ -101,7 +101,6 @@ export const useTableState = <EntityType extends { id: number }, FilterType, Sor
 	useEffect(() => {
 		const onUpdateSubscription = onUpdateSubscriber(undefined, {
 			onData({ data }) {
-				console.log("Received on update subscription data:", data);
 				setEntities((prev) => prev?.map((c) => c.id === data.id ? data : c) || null);
 			},
 			onError(err) {
@@ -111,7 +110,6 @@ export const useTableState = <EntityType extends { id: number }, FilterType, Sor
 
 		const onCreateSubscription = onCreateSubscriber(undefined, {
 			onData(event) {
-				console.log("Received on create subscription data:", event);
 				refetch();
 			},
 			onError(err) {

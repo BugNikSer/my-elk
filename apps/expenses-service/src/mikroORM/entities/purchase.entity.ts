@@ -4,6 +4,8 @@ import { Category } from "./category.entity";
 import { Kind } from "./kind.entity";
 import { Product } from "./product.entity";
 import { Tag } from "./tag.entity";
+import { PurchaseConstructorParams } from "../types";
+import { orm } from "..";
 
 @Entity()
 export class Purchase {
@@ -35,26 +37,19 @@ export class Purchase {
 	constructor({
 		userId,
 		price,
-		product,
-		category,
-		kind,
-		tags,
-		date,
-	}: {
-		userId: number;
-		price: number;
-		product: Product;
-		category: Category;
-		kind: Kind;
-		tags: Tag[];
-		date: Date;
-	}) {
+		productId,
+		categoryId,
+		kindId,
+		tagIds,
+		dateISO,
+	}: PurchaseConstructorParams) {
+		const em = orm.em.fork();
 		this.userId = userId;
 		this.price = price;
-		this.product = product;
-		this.category = category;
-		this.kind = kind;
-		tags.forEach(tag => this.tags.add(tag));
-		this.date = date;
+		this.product = em.getReference(Product, productId);
+		this.category = em.getReference(Category, categoryId);
+		this.kind = em.getReference(Kind, kindId);
+		tagIds.forEach(tagId => this.tags.add(em.getReference(Tag, tagId)));
+		this.date = new Date(dateISO);
 	}
 };

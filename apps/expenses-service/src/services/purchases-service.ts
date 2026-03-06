@@ -1,12 +1,14 @@
-import { FilterQuery, wrap } from "@mikro-orm/core";
+import { FilterQuery, Populate, wrap } from "@mikro-orm/core";
 import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } from "@my-elk/helpers";
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
 import { Category, Kind, Product, Purchase, Tag } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
+import { PurchaseConstructorParams } from "../mikroORM/types";
 
 const logger = areaLogger("purchases-service");
+const populate = ["product", "category", "kind", "tags"] as unknown as Populate<Purchase>;
 
 export default {
     create: async(rawBody: {
@@ -20,27 +22,18 @@ export default {
     }): AsyncResultError<Purchase, ServiceError> => {
         logger.debug("[create]", rawBody);
 
-        const {
-            dateISO,
-            productId,
-            categoryId,
-            kindId,
-            tagIds,
-            ...restBody
-        } = rawBody;
+        const body = { ...rawBody, date: new Date(rawBody.dateISO) } as unknown as PurchaseConstructorParams;
 
-        const body: ConstructorParameters<typeof Purchase>[0] = {
-            ...restBody,
-            date: new Date(dateISO),
-            product: orm.em.fork().getReference(Product, productId),
-            category: orm.em.fork().getReference(Category, categoryId),
-            kind: orm.em.fork().getReference(Kind, kindId),
-            tags: tagIds.map(id => orm.em.fork().getReference(Tag, id)),
-        };
-
-        return createEntity({ Entity: Purchase, body, logger, orm, skipFirstLogging: true });
+        return createEntity({
+            Entity: Purchase,
+            body,
+            populate,
+            logger,
+            orm,
+            skipFirstLogging: true,
+        });
     },
-    update: async (rawBody: {
+    update: async (body: {
         id: number;
         userId: number;
         price: number;
@@ -50,38 +43,22 @@ export default {
         tagIds: number[];
         dateISO: string;
     }): AsyncResultError<Purchase, ServiceError> => {
-        logger.debug("[update]", rawBody);
+        logger.debug("[update] input", body);
 
-        const {
-            dateISO,
-            productId,
-            categoryId,
-            kindId,
-            tagIds,
-            ...restBody
-        } = rawBody;
-
-        const body: ConstructorParameters<typeof Purchase>[0] & { id: number } = {
-            ...restBody,
-            date: new Date(dateISO),
-            product: orm.em.getReference(Product, productId),
-            category: orm.em.getReference(Category, categoryId),
-            kind: orm.em.getReference(Kind, kindId),
-            tags: tagIds.map(id => orm.em.getReference(Tag, id)),
-        };
-
-        const result = updateEntity({
-            Entity: Purchase,
-            body,
-            orm,
-            logger,
-        })
-        return result as AsyncResultError<Purchase, ServiceError>;
+        const result = await updateEntity({
+			Entity: Purchase,
+			body,
+			populate,
+			orm,
+			logger,
+			skipFirstLogging: true,
+		});
+		return result
     },
     getOne: async (where: { id: number; userId: number }): AsyncResultError<Purchase, ServiceError> => {
         logger.debug("[getOne]", where);
         try {
-            const purchase = await orm.em.fork().findOne(Purchase, where);
+            const purchase = await orm.em.fork().findOne(Purchase, where, { populate });
             
             if (!purchase) return [
                 null,
@@ -123,6 +100,7 @@ export default {
             where,
             pagination,
             sorting,
+            populate,
             orm,
             logger,
         });

@@ -13,17 +13,18 @@ export type GetManyServiceParams<
     sorting?: { field: keyof EntityType; order: "ASC" | "DESC" };
 };
 
-export type GetManyHelperParams<
-    EntityType,
-    FilterType extends Record<string, any>,
-> = Omit<GetManyServiceParams<EntityType, FilterType>, "filter" | "userId"> & {
-    Entity: new (params: any) => EntityType;
-    where: FilterQuery<EntityType>;
-    populate?: Populate<EntityType, string>;
-} & ServiceHelperAdditionalParams;
-
-export type ServiceHelperAdditionalParams = {
+export type ServiceHelperAdditionalParams<EntityType> = {
     orm: MikroORM<PostgreSqlDriver, SqlEntityManager<PostgreSqlDriver> & EntityManager<IDatabaseDriver<Connection>>>;
     logger: AreaLogger;
     skipFirstLogging?: boolean;
+    populate?: Populate<EntityType>;
 };
+
+export type GetManyHelperParams<
+    EntityType,
+> = {
+    pagination?: { page: number; pageSize: number };
+    sorting?: { field: keyof EntityType; order: "ASC" | "DESC" };
+    Entity: new (params: any) => EntityType;
+    where: FilterQuery<EntityType>;
+} & ServiceHelperAdditionalParams<EntityType>;

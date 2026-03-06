@@ -5,66 +5,51 @@ import { orm } from "../mikroORM";
 import { Category, Kind, Product } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
 import { FilterQuery, Populate, wrap } from "@mikro-orm/core";
+import { ProductConstructorParams } from "../mikroORM/types";
 
 const logger = areaLogger("products-service");
+const populate = ["defaultCategory", "defaultKind"] as unknown as Populate<Product>
 
 export default {
-	create: async (rawBody: {
+	create: async (body: {
 		name: string;
 		userId: number;
-		defaultCategory?: number;
-		defaultKind?: number;
+		defaultCategoryId?: number;
+		defaultKindId?: number;
 	}): AsyncResultError<Product, ServiceError> => {
-		logger.debug("[create]", rawBody);
-
-		const {
-			defaultCategory: defaultCategoryId,
-			defaultKind: defaultKindId,
-			...restBody
-		} = rawBody;
-
-		const body: Omit<Product, "id"> = {
-			...restBody,
-			defaultCategory: defaultCategoryId ? orm.em.getReference(Category, defaultCategoryId) : undefined,
-			defaultKind: defaultKindId ? orm.em.getReference(Kind, defaultKindId) : undefined
-		};
+		logger.debug("[create]", body);
 
 		return createEntity({
 			Entity: Product,
 			body,
 			orm,
+			populate,
 			logger,
 			skipFirstLogging: true,
 		});
 	},
-	update: async ({
-		defaultCategory,
-		defaultKind,
-		...restBody
-	}: {
+	update: async (body: {
 		name: string;
 		userId: number;
-		defaultCategory?: number;
-		defaultKind?: number;
+		defaultCategoryId?: number;
+		defaultKindId?: number;
 		id: number;
-}
-): AsyncResultError<Product, ServiceError> => {
-		const body: ConstructorParameters<typeof Product>[0] & { id: number } = {
-			...restBody,
-			defaultCategory: defaultCategory ? orm.em.fork().getReference(Category, defaultCategory) : undefined,
-			defaultKind: defaultKind ? orm.em.fork().getReference(Kind, defaultKind) : undefined,
-		}
+	}): AsyncResultError<Product, ServiceError> => {
+		logger.debug("[update]", body);
+
 		return updateEntity({
 			Entity: Product,
 			body,
+			populate,
 			orm,
 			logger,
-		})
+			skipFirstLogging: true,
+		});
 	},
 	getOne: async (where: { id: number, userId: number }): AsyncResultError<Product, ServiceError> => {
 		logger.debug("[getOne]", where);
 		try {
-			const product = await orm.em.fork().findOne(Product, where, { populate: ["defaultCategory", "defaultKind"] });
+			const product = await orm.em.fork().findOne(Product, where, { populate });
 			if (!product) return [
 				null,
 				{
@@ -107,7 +92,7 @@ export default {
 			sorting,
 			orm,
 			logger,
-			populate: ["defaultCategory", "defaultKind"] as unknown as Populate<Product>,
+			populate,
 		})
 	},
 };

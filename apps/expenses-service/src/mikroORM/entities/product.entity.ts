@@ -2,6 +2,8 @@ import { Entity, ManyToOne } from "@mikro-orm/postgresql";
 import { BaseTag } from "./baseTag";
 import { Category } from "./category.entity";
 import { Kind } from "./kind.entity";
+import { ProductConstructorParams } from "../types";
+import { orm } from "..";
 
 @Entity()
 export class Product extends BaseTag {
@@ -15,16 +17,12 @@ export class Product extends BaseTag {
 	constructor({
 		name,
 		userId,
-		defaultCategory,
-		defaultKind,
-	}: {
-		name: string;
-		userId: number;
-		defaultCategory?: Category;
-		defaultKind?: Kind;
-	}) {
+		defaultCategoryId,
+		defaultKindId,
+	}: ProductConstructorParams) {
 		super({ name, userId });
-		this.defaultCategory = defaultCategory;
-		this.defaultKind = defaultKind;
+		const em = orm.em.fork();
+		this.defaultCategory = defaultCategoryId !== undefined ? em.getReference(Category, defaultCategoryId) : undefined;
+		this.defaultKind = defaultKindId !== undefined ? em.getReference(Kind, defaultKindId) : undefined;
 	}
 };

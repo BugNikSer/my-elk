@@ -13,8 +13,8 @@ const emitter = new IterableEventEmitter<MyEvents<Product>>();
 
 const productCreateInput = z.object({
     name: z.string(),
-    defaultCategory: z.number().optional(),
-    defaultKind: z.number().optional(),
+    defaultCategoryId: z.number().optional(),
+    defaultKindId: z.number().optional(),
 });
 const productUpdateInput = productCreateInput.extend({ id: z.number() });
 

@@ -6,6 +6,12 @@ import { TRPCContext } from '../trpc/context';
 import { IncomingMessage, ServerResponse } from 'http';
 
 export type EventMap<T> = Record<keyof T, any[]>;
+
+export interface MyEvents<Entity> {
+	created: [data: Entity];
+	updated: [data: Entity];
+};
+
 export class IterableEventEmitter<T extends EventMap<T>> extends EventEmitter<T> {
 	toIterable<TEventName extends keyof T & string>(
 		eventName: TEventName,
@@ -13,11 +19,6 @@ export class IterableEventEmitter<T extends EventMap<T>> extends EventEmitter<T>
 	): AsyncIterable<T[TEventName]> {
 		return on(this as any, eventName, opts) as any;
 	}
-};
-
-export interface MyEvents<Entity> {
-	created: [data: Entity];
-	updated: [data: Entity];
 };
 
 export async function* onEvent<Entity extends { userId: number; id: number }>({
@@ -37,12 +38,12 @@ export async function* onEvent<Entity extends { userId: number; id: number }>({
 	const { ctx, signal } = options;
 	const iterable = emitter.toIterable(event, { signal });
 
-	function* maybeYield(category: Entity) {
-		if (category.userId !== ctx.userId) return;
-		yield tracked(String(category.id), category);
+	function* maybeYield(entity: Entity) {
+		if (entity.userId !== ctx.userId) return;
+		yield tracked(String(entity.id), entity);
 	}
 
-	for await (const [category] of iterable) {
-		yield* maybeYield(category);
+	for await (const [entity] of iterable) {
+		yield* maybeYield(entity);
 	}
 }

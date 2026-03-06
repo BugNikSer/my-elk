@@ -1,4 +1,5 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/postgresql";
+import { BaseTagConstructorParams } from "../types";
 
 @Entity({ abstract: true })
 export abstract class BaseTag {
@@ -15,10 +16,7 @@ export abstract class BaseTag {
 	constructor({
 		name,
 		userId,
-	}: {
-		name: string;
-		userId: number;
-	}) {
+	}: BaseTagConstructorParams) {
 		this.name = name;
 		this.userId = userId;
 	}
