@@ -6,7 +6,7 @@
   "types": "src/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npx ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
     "migration:create": "npx mikro-orm migration:create",
     "migration:up": "npx mikro-orm migration:up",
     "build": "tsc"
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/node": "^25.0.3",
+    "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }

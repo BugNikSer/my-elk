@@ -1,9 +1,11 @@
-import { Populate, wrap, type FindOptions, type OrderDefinition } from "@mikro-orm/core";
+import { EntityDTO, FromEntityType, Populate, wrap, type FindOptions, type OrderDefinition } from "@mikro-orm/core";
 import { TRPCError } from "@trpc/server";
 
 import { AsyncResultError, ResultError, ServiceError } from "@my-elk/result-error";
 import { AreaLogger } from "@my-elk/logger";
 import { GetManyHelperParams, ServiceHelperAdditionalParams } from "./crudTypes";
+
+const entityToLog = (entity: any) => JSON.parse(JSON.stringify(entity));
 
 export const createEntity = async <Result, EntityType extends { id: number }, EntityConstructorParams>({
     Entity,
@@ -21,37 +23,45 @@ export const createEntity = async <Result, EntityType extends { id: number }, En
     let entity: EntityType;
     const em = orm.em.fork();
 
+    // 1. Create new entity instance with provided body
     try {
         entity = new Entity(body);
+        logger.debug("[create] Created entity instance", entityToLog(entity));
     } catch (e) {
-        logger.warn("Failed while creating class instance", e);
+        logger.warn("[create] Failed while creating class instance", e);
         return [null, { error: e as Error, code: "BAD_REQUEST"}];
     }
 
+    // 2. Persist new entity to database
     try {
         em.persist(entity);
+        logger.debug("[create] Persisted new entity", entityToLog(entity));
     } catch (e) {
-        logger.warn("Failed while persisting new entity", e);
+        logger.warn("[create] Failed while persisting new entity", e);
         return [null, { error: e as Error, code: "CONFLICT"}];
     }
     
+    // 3. Flush changes to database
     try {
         await em.flush();
+        logger.debug("[create] Flushed changes to database", entityToLog(entity));
     } catch (e) {
-        logger.warn("Failed while committing changes", e);
+        logger.warn("[create] Failed while committing changes", e);
         return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR"}];
     }
 
+    // 4. Query created entity to return fresh data with populated relations
     try {
         const result = await em.findOne(Entity, { id: (entity as any).id }, { populate });
+        logger.debug("[create] Queried created entity", entityToLog(result));
         return [wrap(result).toObject() as unknown as Result, null];
     } catch (e) {
-        logger.warn("Failed while querying created entity", e);
+        logger.warn("[create] Failed while querying created entity", e);
         return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
     }
 };
 
-export const updateEntity = async <EntityType extends object, EntityConstructorParams>({
+export const updateEntity = async <EntityType extends { id: number }, EntityConstructorParams>({
     Entity,
     body,
     populate,
@@ -67,9 +77,9 @@ export const updateEntity = async <EntityType extends object, EntityConstructorP
         const em = orm.em.fork();
         let entity: EntityType;
 
+        // 1. Query existing entity
         try {
-            entity = await em.findOne(Entity, { id: body.id });
-            logger.debug("[update] Queried entity", entity);
+            entity = await em.findOne(Entity, { id: body.id }, { populate });
             if (!entity) return [
                 null,
                 {
@@ -77,44 +87,62 @@ export const updateEntity = async <EntityType extends object, EntityConstructorP
                     error: new Error("Entity not found"),
                 },
             ];
+            logger.debug("[update] Queried entity", entityToLog(entity));
         } catch (e) {
             logger.warn(`[update] Failed while querying entity with id ${body.id}`, e);
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
 
+        // 2. Update entity properties with new values from body
         try {
-            logger.debug("[update] Updating entity with new values", body);
-            Object.keys(body).forEach(bodyKey => {
-                if (bodyKey === "id") return;
+            logger.debug("[update] Prepare body with new values", body);
+            const preparedBody = Object.entries(body).reduce((acc, [bodyKey, bodyValue]) => {
                 let entityKey = bodyKey;
+                let newValue: any = bodyValue;
+
+                // replace "relationId" with "relation" to match entity property
                 if (bodyKey.endsWith("Id") && bodyKey !== "userId") {
                     entityKey = bodyKey.slice(0, -2);
                 }
-                (entity as any)[entityKey] = (body as any)[bodyKey];
-            });
-            logger.debug("[update] Prepared entity with new values", entity);
+                // replace "relationIds" with "relations" to match entity property
+                if (bodyKey.endsWith("Ids")) {
+                    entityKey = bodyKey.slice(0, -3) + "s";
+                }
+                // replace "dateISO" with "date" and convert to Date object
+                if (bodyKey === "dateISO") {
+                    entityKey = "date";
+                    newValue = new Date(bodyValue);
+                }
+
+                acc[entityKey] = newValue;
+                return acc;
+            }, {} as Record<string, any>) as Partial<EntityDTO<FromEntityType<EntityType>, never>>;
+            logger.debug("[update] Prepared body with new values", preparedBody);
+            
+            // Assign new values to entity instance
+            wrap(entity).assign(preparedBody, { em, updateByPrimaryKey: true });
+            logger.debug("[update] Prepared entity with new values", entityToLog(entity));
+
             await em.persist(entity);
         } catch (e) {
             logger.warn("[update] Failed while persisting updated entity", e);
             return [null, { error: e as Error, code: "BAD_REQUEST" }];
         }
 
+        // 3. Flush changes to database
         try {
-            console.log("======= flushing changes =======");
             await em.flush();
-            console.log("======= flush successful =======");
         } catch (e) {
             logger.warn("[update] Failed while committing changes", e);
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
 
+        // 4. Query updated entity to return fresh data with populated relations
         try {
-            console.log("======= querying updated entity =======");
             const result = await em.findOne(Entity, { id: body.id }, { populate });
-            logger.debug("[update] Queried updated entity", result);
+            logger.debug("[update] Queried updated entity", entityToLog(result));
             return [result as EntityType, null];
         } catch (e) {
-            console.log("======= failed to query updated entity =======");
             logger.warn("[update] Failed while querying updated entity", e);
             return [null, { error: e as Error, code: "INTERNAL_SERVER_ERROR" }];
         }
@@ -134,21 +162,20 @@ export const getManyEntities = async <
 }: GetManyHelperParams<EntityType> & ServiceHelperAdditionalParams<EntityType>): AsyncResultError<{ data: Result[], total: number }, ServiceError> => {
     logger.debug("[getMany]", { where, pagination, sorting });
 
-    const limitOffset = pagination ? {
-        limit: pagination.pageSize,
-        offset: (pagination.page - 1) * pagination.pageSize,
-    } : {};
-    const options: FindOptions<EntityType> = {
+    const findOptions: FindOptions<EntityType> = {
         orderBy: { [sorting.field]: sorting.order } as OrderDefinition<EntityType>,
-        ...(limitOffset),
         populate: populate as Populate<EntityType>
     };
+    if (pagination) {
+        findOptions.limit = pagination.pageSize;
+        findOptions.offset = (pagination.page - 1) * pagination.pageSize;
+    }
 
     try {
         const em = orm.em.fork();
         const [total, entities] = await Promise.all([
             em.count(Entity, where),
-            em.find(Entity, where, options),
+            em.find(Entity, where, findOptions),
         ]);
         return [
             {
