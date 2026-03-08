@@ -3,7 +3,7 @@ import { createEntity, getManyEntities, GetManyServiceParams, updateEntity } fro
 import { AsyncResultError, ServiceError } from "@my-elk/result-error";
 
 import { orm } from "../mikroORM";
-import { Category, Kind, Product, Purchase, Tag } from "../mikroORM/entities";
+import { Purchase } from "../mikroORM/entities";
 import { areaLogger } from "../utils/logger";
 import { PurchaseConstructorParams } from "../mikroORM/types";
 

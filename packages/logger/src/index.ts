@@ -5,6 +5,20 @@ import envVars from "@my-elk/env-vars";
 type TLogLevel = 'error' | 'warn' | 'info' | 'http' | 'verbose' | 'debug' | 'silly';
 const { combine, timestamp, printf, colorize, json, metadata, label } = winston.format;
 
+// const safeLog = (item: any) => {
+//   if (!item) return item;
+  
+//   const seen = new WeakSet();
+  
+//   return JSON.parse(JSON.stringify(item, (key, value) => {
+//     if (typeof value === 'object' && value !== null) {
+//       if (seen.has(value)) return '[Circular]';
+//       seen.add(value);
+//     }
+//     return value;
+//   }));
+// }
+
 const createLogger = ({
   app,
 }: {
