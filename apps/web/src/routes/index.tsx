@@ -1,9 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import Charts from '../features/Charts';
 
 export const Route = createFileRoute('/')({
-  component: Index,
+  component: Charts,
 });
-
-function Index() {
-    return <span>Index</span>
-}

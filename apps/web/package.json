@@ -29,6 +29,7 @@
     "@trpc/tanstack-react-query": "^11.10.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-window": "^2.2.7",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
