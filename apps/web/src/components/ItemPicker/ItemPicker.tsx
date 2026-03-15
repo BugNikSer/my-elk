@@ -1,5 +1,5 @@
 import type { KeyboardEventHandler } from "react";
-import React, { useState, useRef, useCallback, useMemo, useEffect, use } from "react";
+import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { SearchOutlined } from "@mui/icons-material";
 import { TextField, Popover, Stack, CircularProgress, Alert } from "@mui/material";
 
@@ -16,7 +16,7 @@ import { defaultFilterFunction, getField, getNewPickerValueOnOptionCLick } from 
 import ItemPickerValueMultiple from "./ItemPickerValueMultiple";
 import ItemPickerEndAdornment from "./ItemPickerEndAdornment";
 import ItemPickerVirtualList from "./ItemPickerVirtualList";
-import { useBoolean, useDebounceValue } from "usehooks-ts";
+import { useBoolean } from "usehooks-ts";
 
 function ItemPicker<Option = string | number | Record<string, any>>({
 	value: pickerValue,
@@ -44,13 +44,12 @@ function ItemPicker<Option = string | number | Record<string, any>>({
 	const textFieldRef = useRef<HTMLDivElement | null>(null);
 	const inputRef = useRef<HTMLElement | null>(null);
 
-	// Унификация options:
-	// если нет value/label - рассчитать их один раз и добавить в option (либо преобразовать примитив в объект с value и label)
-	// таким образом в дочерних компонентах можно не рассчитывать по несколько раз
-	// Словарь:
-	// Несколько раз нужно делать поиск, а пик по словарю работает быстрее
-	const unifiedOptionsDict: ItemPickerUnifiedOptionsDict<Option> = useMemo(() => {
-		return rawOptions.reduce((acc, option) => {
+	const hiddenPickedValues = useRef(new Set<ItemPickerOptionValue>());
+	const [hiddenPickedOptions, setHiddenPickedOptions] = useState<ItemPickerUnifiedOption<Option>[]>([]);
+
+	const [unifiedOptionsDict, setUnifiedOptionsDict] = useState<ItemPickerUnifiedOptionsDict<Option>>({});
+	useEffect(() => setUnifiedOptionsDict(prev => {
+		const fromRawOptions = rawOptions.reduce((acc, option) => {
 			if (typeof option === "object") {
 				const optionValue = getField({ option, getter: getValue, defaultField: "value" });
 				const optionLabel = getField({ option, getter: getLabel, defaultField: "label" });
@@ -70,8 +69,21 @@ function ItemPicker<Option = string | number | Record<string, any>>({
 					label: option as ItemPickerOptionValue,
 				} as ItemPickerUnifiedOption<Option>,
 			};
-		}, {} as ItemPickerUnifiedOptionsDict<Option>) as ItemPickerUnifiedOptionsDict<Option>;
-	}, [rawOptions, getLabel, getValue]);
+		}, {} as ItemPickerUnifiedOptionsDict<Option>);
+
+		const valueArr = pickerValue === null ? [] : Array.isArray(pickerValue) ? pickerValue : [pickerValue];
+		const fromValue = valueArr.reduce((acc, value) => {
+			return { ...acc, [value]: prev[value]  }
+		}, {} as ItemPickerUnifiedOptionsDict<Option>);
+
+		return { ...fromRawOptions, ...fromValue };
+	}), [rawOptions, getLabel, getValue]);
+
+	useEffect(() => {
+		setHiddenPickedOptions(
+			Array.from(hiddenPickedValues.current).map(v => unifiedOptionsDict[v])
+		);
+	}, [JSON.stringify(unifiedOptionsDict), JSON.stringify(Array.from(hiddenPickedValues.current))]);
 
 	const {
 		value: isListOpened,
@@ -92,15 +104,7 @@ function ItemPicker<Option = string | number | Record<string, any>>({
 		return Object.values(unifiedOptionsDict).filter(item =>
 			(filterFunction || defaultFilterFunction)(item, filterValue),
 		);
-	}, [unifiedOptionsDict, filterValue]);
-
-	// Разнесено на два состояния по двум причинам:
-	// 1 - пробрасывать удобнее примитивы, плюс их фильтрация происходит быстрее
-	// 2 - новому чипу сначала нужно отрендериться, после чего у него появится рефа, которая попадёт в useIsVisible, после чего сработает useLayoutEffect
-	// на это нужно время, поэтому hiddenPickedOptions устанавливаются на основе hiddenPickedValues с дебаунсом
-	const [hiddenPickedValues, setHiddenPickedValues] = useState<ItemPickerOptionValue[]>([]);
-	const [hiddenPickedOptions, setHiddenPickedOptions] = useDebounceValue<ItemPickerUnifiedOption<Option>[]>([], 5);
-	useEffect(() => setHiddenPickedOptions(hiddenPickedValues.map(v => unifiedOptionsDict[v])), [hiddenPickedValues]);
+	}, [JSON.stringify(unifiedOptionsDict), filterValue]);
 
 	const handleOptionClick: ItemPickerHandleOptionClick = optionValue => {
 		onChange(
@@ -118,8 +122,8 @@ function ItemPicker<Option = string | number | Record<string, any>>({
 	}, []);
 
 	const handleVisible: ItemPickerHandlePickedOptionVisible = useCallback(({ value, isVisible }) => {
-		if (isVisible) setHiddenPickedValues(prev => prev.filter(i => i !== value));
-		else setHiddenPickedValues(prev => [...prev, value]);
+		if (isVisible) hiddenPickedValues.current.delete(value);
+		else hiddenPickedValues.current.add(value);
 	}, []);
 
 	const pickedOptions = useMemo(() => {

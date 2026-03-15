@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useDebounceCallback } from "usehooks-ts";
+import { useBoolean, useDebounceCallback } from "usehooks-ts";
 import { CloseRounded, ArrowDropUpOutlined, ArrowDropDownOutlined } from "@mui/icons-material";
 import { Chip, IconButton, Popper, Stack } from "@mui/material";
 
@@ -14,14 +14,8 @@ function ItemPickerEndAdornment<Option>({
 	onDelete,
 }: ItemPickerEndAdornmentProps<Option>) {
 	const moreChipRef = useRef<HTMLDivElement>(null);
-	// TODO: заменить на useBoolean
-	const [isMoreChipHovered, setMoreChipHovered] = useState(false);
-	const onMoreChipMouseEnter = useCallback(() => setMoreChipHovered(true), []);
-	const onMoreChipMouseLeave = useCallback(() => setMoreChipHovered(false), []);
-	// TODO: заменить на useBoolean
-	const [isMorePopperHovered, setMorePopperHovered] = useState(false);
-	const onMorePopperMouseEnter = useCallback(() => setMorePopperHovered(true), []);
-	const onMorePopperMouseLeave = useCallback(() => setMorePopperHovered(false), []);
+	const { value: isMoreChipHovered, setTrue: onIsMoreChipHovered, setFalse: offIsMoreChipHovered } = useBoolean(false);
+	const { value: isMorePopperHovered, setTrue: onIsMorePopperHovered, setFalse: offIsMorePopperHovered } = useBoolean(false);
 
 	const [isMorePopperOpened, setMorePopperOpened] = useState(false);
 	const handleMoreComponentsHovers = useDebounceCallback(
@@ -38,15 +32,15 @@ function ItemPickerEndAdornment<Option>({
 						ref={moreChipRef}
 						onClick={e => e.stopPropagation()}
 						label={`+${hiddenPickedOptions.length}`}
-						onMouseEnter={onMoreChipMouseEnter}
-						onMouseLeave={onMoreChipMouseLeave}
+						onMouseEnter={onIsMoreChipHovered}
+						onMouseLeave={offIsMoreChipHovered}
 					/>
 
 					<Popper anchorEl={moreChipRef.current} open={isMorePopperOpened}>
 						<Stack
 							direction="row"
-							onMouseEnter={onMorePopperMouseEnter}
-							onMouseLeave={onMorePopperMouseLeave}
+							onMouseEnter={onIsMorePopperHovered}
+							onMouseLeave={offIsMorePopperHovered}
 							sx={theme => ({
 								padding: "8px",
 								maxWidth: "400px",
@@ -55,10 +49,11 @@ function ItemPickerEndAdornment<Option>({
 								backgroundColor: theme.palette.background.default,
 								borderRadius: "8px",
 								boxShadow: "rgba(0, 0, 0, 0.25) 0px 4px 16px 0px",
+								gap: 1,
 							})}
 						>
 							{hiddenPickedOptions.map(unifiedOption => (
-								<ItemPickerChip key={unifiedOption.value} {...{ unifiedOption, onDelete }} />
+								<ItemPickerChip key={unifiedOption.value} ignoreIntersection {...{ unifiedOption, onDelete }} />
 							))}
 						</Stack>
 					</Popper>

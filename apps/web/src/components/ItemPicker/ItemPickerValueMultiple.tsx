@@ -9,6 +9,7 @@ function ItemPickerValueMultiple<Option>({
 	handleVisible,
 	onDelete,
 	openList,
+	slotProps,
 }: ItemPickerValueMultipleProps<Option>) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	return (
@@ -20,6 +21,7 @@ function ItemPickerValueMultiple<Option>({
 				display: "-webkit-inline-box",
 				WebkitLineClamp: 1,
 				WebkitBoxOrient: "vertical",
+				WebkitColumnSpan: 1,
 				overflow: "hidden",
 				wordBreak: "break-word",
 			}}
@@ -32,7 +34,22 @@ function ItemPickerValueMultiple<Option>({
 			{pickedOptions.map(unifiedOption => (
 				<ItemPickerChip
 					key={unifiedOption.value}
-					{...{ unifiedOption, handleVisible, onDelete, containerRef }}
+					{...{
+						unifiedOption,
+						handleVisible,
+						onDelete,
+						containerRef,
+						slotProps: {
+							...slotProps,
+							chip: {
+								...slotProps?.chip,
+								sx: {
+									...slotProps?.chip?.sx,
+									ml: 0.5,
+								},
+							},
+						},
+					}}
 				/>
 			))}
 		</Box>

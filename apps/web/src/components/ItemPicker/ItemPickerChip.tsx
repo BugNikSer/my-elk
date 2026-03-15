@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { Chip } from "@mui/material";
 import { useIntersectionObserver } from "usehooks-ts";
 
@@ -8,19 +8,25 @@ function ItemPickerChip<Option>({
 	unifiedOption: { value, label },
 	onDelete,
 	handleVisible,
+	ignoreIntersection,
 	containerRef,
 	slotProps,
 }: ItemPickerChipProps<Option>) {
-	const [ref, isVisible] = useIntersectionObserver({ threshold: 1, root: containerRef?.current });
+	const [ref] = useIntersectionObserver({
+		threshold: 1,
+		root: containerRef?.current,
+		onChange: (isIntersecting) => {
+			if (!ignoreIntersection) handleVisible?.({ isVisible: isIntersecting, value });
+		}
+	});
 
 	const onItemDelete = useCallback(() => onDelete(value), [onDelete, value]);
 
-	useLayoutEffect(() => {
-		handleVisible?.({ isVisible, value });
+	useEffect(() => {
 		return () => {
-			handleVisible?.({ isVisible: true, value });
+			if (!ignoreIntersection) handleVisible?.({ isVisible: true, value });
 		};
-	}, [isVisible, value]);
+	}, [ignoreIntersection]);
 
 	return (
 		<Chip
@@ -37,11 +43,10 @@ function ItemPickerChip<Option>({
 				event.stopPropagation();
 				event.preventDefault();
 			}}
+			size="small"
 			sx={{
+				// mr: 0.5,
 				...slotProps?.chip?.sx,
-				ml: "4px",
-				mb: "1px",
-				height: "18px",
 			}}
 		/>
 	);

@@ -40,6 +40,7 @@ export interface ItemPickerChipProps<Option> {
 	slotProps?: {
 		chip?: ChipProps;
 	};
+	ignoreIntersection?: boolean;
 }
 
 export interface ItemPickerListOptionSlotProps {
